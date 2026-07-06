@@ -1,0 +1,28 @@
+{
+  "title": "OpenWASH \u2014 an open, provenance-tagged reuse-safety substrate and guardrail for excreta reuse",
+  "description": "OpenWASH is an open, provenance-tagged constraint substrate and decision guardrail for the safety\nof reusing human excreta, urine, and wastewater. It consolidates the corroborated thresholds and\npathogen die-off kinetics that separate safe nutrient-cycling reuse from a disease vector, and\nenforces four honesty rules on every value: no naked numbers (each cites a source and page); a\ncorroboration tier computed from independent source lineages (which caught a real over-claim in the\nguidelines); a separation of design-target from field-verified outcome; and contested values\nsurfaced rather than averaged. A first-order die-off engine screens storage, ammonia-amendment, and\nthermal treatment regimes for pathogen-reduction sufficiency (binding on Ascaris), siding with the\nconservative signal, and a plain-language guardrail returns SAFE / UNSAFE / NOT ENOUGH EVIDENCE with\nthe binding pathogen and the specific fix. Load-bearing numbers were adversarially verified against a\n151-paper refutation scan. A companion techno-economic study finds the engineering cheap and solvable\nand that safe excreta reuse is a subsidized public good rather than a self-funding business. Data are\nsourced (WHO, EAWAG, Sphere, US EPA, peer-reviewed literature) and cited, not rehosted.",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "Apache-2.0",
+  "creators": [
+    {
+      "name": "Cope, Seth",
+      "orcid": "0009-0000-5520-915X",
+      "affiliation": "Independent researcher"
+    }
+  ],
+  "keywords": [
+    "sanitation",
+    "WASH",
+    "faecal sludge management",
+    "excreta reuse",
+    "reuse safety",
+    "helminth eggs",
+    "Ascaris",
+    "pathogen die-off",
+    "ecological sanitation",
+    "resource recovery",
+    "open data",
+    "provenance"
+  ]
+}

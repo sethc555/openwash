@@ -4,3 +4,15 @@ __pycache__/
 .venv/
 *.tmp
 .DS_Store
+
+# --- pubkit guard: keep secrets + raw transcripts out of a public repo ---
+conversation/
+*.local
+*.local.*
+.env
+.env.*
+.zenodo-token
+*.pem
+*.key
+id_rsa
+id_ed25519

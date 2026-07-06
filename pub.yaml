@@ -1,0 +1,43 @@
+# openwash/pub.yaml — per-repo publishing config. Identity (name/ORCID) comes from pubkit.
+title: "OpenWASH — an open, provenance-tagged reuse-safety substrate and guardrail for excreta reuse"
+slug: "openwash"                     # GitHub repo name (under the identity's github_user)
+abstract: |
+  OpenWASH is an open, provenance-tagged constraint substrate and decision guardrail for the safety
+  of reusing human excreta, urine, and wastewater. It consolidates the corroborated thresholds and
+  pathogen die-off kinetics that separate safe nutrient-cycling reuse from a disease vector, and
+  enforces four honesty rules on every value: no naked numbers (each cites a source and page); a
+  corroboration tier computed from independent source lineages (which caught a real over-claim in the
+  guidelines); a separation of design-target from field-verified outcome; and contested values
+  surfaced rather than averaged. A first-order die-off engine screens storage, ammonia-amendment, and
+  thermal treatment regimes for pathogen-reduction sufficiency (binding on Ascaris), siding with the
+  conservative signal, and a plain-language guardrail returns SAFE / UNSAFE / NOT ENOUGH EVIDENCE with
+  the binding pathogen and the specific fix. Load-bearing numbers were adversarially verified against a
+  151-paper refutation scan. A companion techno-economic study finds the engineering cheap and solvable
+  and that safe excreta reuse is a subsidized public good rather than a self-funding business. Data are
+  sourced (WHO, EAWAG, Sphere, US EPA, peer-reviewed literature) and cited, not rehosted.
+manuscript: "README.md"
+keywords:
+  - sanitation
+  - WASH
+  - faecal sludge management
+  - excreta reuse
+  - reuse safety
+  - helminth eggs
+  - Ascaris
+  - pathogen die-off
+  - ecological sanitation
+  - resource recovery
+  - open data
+  - provenance
+doi: ""
+software_doi: ""
+
+# per-repo overrides of the shared identity
+license:
+  code: "Apache-2.0"                 # deliberate: patent grant for an embeddable substrate (see LICENSING.md)
+  text: "CC-BY-4.0"
+disclaimer: >-
+  OpenWASH is a screen, not a certifier — a decision aid that rules out unsafe reuse designs and states
+  what to measure. It is not a medical device, a guarantee of safety, or a substitute for testing before
+  reuse, and it does not address non-pathogen (chemical / antimicrobial-resistance) hazards. Independent;
+  not affiliated with or endorsed by any cited organization. Developed with AI assistance (disclosed).
