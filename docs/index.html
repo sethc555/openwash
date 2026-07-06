@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenWASH — a reuse-safety guardrail</title>
+<meta name="description" content="The corroborated numbers that separate safe reuse of human waste from a disease vector — held honestly, and put where the decision is made.">
+<meta name="theme-color" content="#2C6E4A" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1512" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:title" content="OpenWASH — a reuse-safety guardrail">
+<meta property="og:description" content="The line between reuse that heals and reuse that harms is a handful of numbers. OpenWASH holds them honestly.">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2288%22>%F0%9F%9B%A1%EF%B8%8F</text></svg>">
+<style>
+  :root{
+    --paper:#F2F4F1; --paper-2:#EAEEE8; --ink:#16211C; --ink-soft:#4A574F;
+    --line:#D5DCD3; --line-strong:#C2CBBF;
+    --safe:#2C6E4A; --unsafe:#A23B2C; --unknown:#9A6A16;
+    --accent:#2C6E4A; --accent-ink:#1E4E36;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Charter,Georgia,"Times New Roman",serif;
+    --mono:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,"Liberation Mono",monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --measure:66ch;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#0F1512; --paper-2:#151C18; --ink:#E7ECE6; --ink-soft:#95A399;
+      --line:#26302A; --line-strong:#33403780;
+      --safe:#54B884; --unsafe:#D3634E; --unknown:#D2A03E;
+      --accent:#54B884; --accent-ink:#8ED3AE;
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#F2F4F1; --paper-2:#EAEEE8; --ink:#16211C; --ink-soft:#4A574F;
+    --line:#D5DCD3; --line-strong:#C2CBBF;
+    --safe:#2C6E4A; --unsafe:#A23B2C; --unknown:#9A6A16; --accent:#2C6E4A; --accent-ink:#1E4E36;
+  }
+  :root[data-theme="dark"]{
+    --paper:#0F1512; --paper-2:#151C18; --ink:#E7ECE6; --ink-soft:#95A399;
+    --line:#26302A; --line-strong:#33403780;
+    --safe:#54B884; --unsafe:#D3634E; --unknown:#D2A03E; --accent:#54B884; --accent-ink:#8ED3AE;
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--serif); font-size:19px; line-height:1.62;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    transition:background .3s ease,color .3s ease;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:0 26px}
+  ::selection{background:var(--accent); color:var(--paper)}
+
+  a{color:var(--accent-ink); text-decoration:none; border-bottom:1px solid var(--line-strong)}
+  a:hover{border-bottom-color:var(--accent)}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:2px}
+
+  .eyebrow{
+    font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--ink-soft);
+  }
+  .mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+
+  header.top{border-bottom:1px solid var(--line)}
+  .top-in{max-width:760px;margin:0 auto;padding:16px 26px;display:flex;justify-content:space-between;align-items:baseline;gap:16px}
+  .brand{font-family:var(--sans);font-weight:700;letter-spacing:-.01em;font-size:16px}
+  .brand b{color:var(--accent-ink)}
+
+  .hero{padding:74px 0 44px}
+  h1{
+    font-family:var(--serif); font-weight:600; font-size:clamp(2.35rem,6.4vw,3.6rem);
+    line-height:1.06; letter-spacing:-.015em; margin:.5rem 0 0; text-wrap:balance;
+  }
+  h1 .hl{color:var(--accent-ink)}
+  .lede{font-size:1.16rem; color:var(--ink-soft); margin:1.4rem 0 0; max-width:60ch; text-wrap:pretty}
+
+  section{padding:52px 0}
+  section+section{border-top:1px solid var(--line)}
+  h2{
+    font-family:var(--serif); font-weight:600; font-size:clamp(1.6rem,4vw,2.05rem);
+    line-height:1.14; letter-spacing:-.01em; margin:.7rem 0 0; text-wrap:balance; max-width:26ch;
+  }
+  p{margin:1.05rem 0; max-width:var(--measure); text-wrap:pretty}
+  strong{font-weight:600}
+
+  .verdicts{display:grid; gap:16px; margin-top:26px}
+  .verdict{
+    border:1px solid var(--line); border-left:5px solid var(--st); border-radius:7px;
+    background:var(--paper-2); padding:18px 20px 18px 22px;
+  }
+  .verdict .tag{
+    font-family:var(--mono); font-size:12.5px; font-weight:600; letter-spacing:.02em;
+    color:var(--st); display:flex; align-items:center; gap:9px;
+  }
+  .verdict .tag::before{content:""; width:9px; height:9px; border-radius:50%; background:var(--st); flex:none}
+  .verdict .case{font-family:var(--mono); font-size:12.5px; color:var(--ink-soft); margin-top:2px}
+  .verdict .why{margin:11px 0 0; font-size:1.02rem}
+  .verdict .why b{color:var(--ink)}
+  .v-safe{--st:var(--safe)} .v-unsafe{--st:var(--unsafe)} .v-unknown{--st:var(--unknown)}
+
+  .callout{
+    border-left:3px solid var(--accent); padding:2px 0 2px 20px; margin:26px 0;
+    color:var(--ink); font-size:1.06rem;
+  }
+
+  .figs{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-top:28px}
+  .fig{background:var(--paper); padding:22px}
+  .fig .n{font-family:var(--mono); font-weight:600; font-size:clamp(1.7rem,5vw,2.3rem); letter-spacing:-.02em; line-height:1; color:var(--accent-ink)}
+  .fig .n small{font-size:.5em; color:var(--ink-soft); font-weight:400}
+  .fig .lab{margin-top:9px; font-size:.96rem; line-height:1.4}
+  .fig .src{font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); margin-top:9px; letter-spacing:.01em}
+
+  .rules{list-style:none; margin:24px 0 0; padding:0; display:grid; gap:2px}
+  .rules li{padding:16px 0; border-top:1px solid var(--line); display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:baseline}
+  .rules li:last-child{border-bottom:1px solid var(--line)}
+  .rules .k{font-family:var(--mono); font-size:12px; color:var(--ink-soft); white-space:nowrap; padding-top:2px}
+  .rules .t{font-size:1.03rem}
+  .rules .t b{color:var(--ink)}
+
+  .pull{padding:60px 0}
+  .pull p{font-family:var(--serif); font-size:clamp(1.5rem,4.4vw,2rem); line-height:1.28; letter-spacing:-.01em; max-width:24ch; margin:0; font-weight:600; text-wrap:balance}
+  .pull .after{font-size:1.06rem; font-weight:400; color:var(--ink-soft); max-width:var(--measure); margin-top:1.3rem; line-height:1.6}
+
+  .fit{display:grid; gap:14px; margin-top:24px}
+  .fit .row{display:grid; grid-template-columns:130px 1fr; gap:18px; padding:15px 0; border-top:1px solid var(--line)}
+  .fit .row:last-child{border-bottom:1px solid var(--line)}
+  .fit .who{font-family:var(--sans); font-weight:600; font-size:.9rem; letter-spacing:.01em}
+  .fit .what{font-size:1rem; color:var(--ink-soft)}
+  .fit .what b{color:var(--ink);font-weight:600}
+
+  footer{border-top:1px solid var(--line); background:var(--paper-2); margin-top:12px}
+  .foot-in{max-width:760px;margin:0 auto;padding:44px 26px 56px}
+  .ledger{font-family:var(--mono); font-size:12.5px; color:var(--ink-soft); line-height:1.9}
+  .ledger .row{display:grid; grid-template-columns:112px 1fr; gap:14px; padding:5px 0; border-bottom:1px dotted var(--line-strong)}
+  .ledger .row span:first-child{color:var(--ink)}
+  .ledger a{color:var(--accent-ink)}
+  .disc{font-family:var(--serif); font-size:.98rem; color:var(--ink-soft); margin-top:26px; max-width:var(--measure); border-left:3px solid var(--unknown); padding-left:18px}
+
+  .theme-btn{
+    font-family:var(--mono); font-size:12px; background:none; border:1px solid var(--line-strong);
+    color:var(--ink-soft); padding:5px 10px; border-radius:6px; cursor:pointer;
+  }
+  .theme-btn:hover{border-color:var(--accent); color:var(--accent-ink)}
+
+  @media(max-width:560px){
+    body{font-size:18px}
+    .figs{grid-template-columns:1fr}
+    .fit .row{grid-template-columns:1fr; gap:5px}
+    .rules li{grid-template-columns:1fr; gap:5px}
+    .ledger .row{grid-template-columns:92px 1fr}
+  }
+
+  .reveal{opacity:0; transform:translateY(12px); animation:rise .7s cubic-bezier(.2,.7,.3,1) forwards}
+  @keyframes rise{to{opacity:1; transform:none}}
+  @media(prefers-reduced-motion:reduce){.reveal{animation:none; opacity:1; transform:none}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">Open<b>WASH</b></div>
+    <button class="theme-btn" id="tt" aria-label="Toggle light or dark theme">theme</button>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="hero reveal">
+      <div class="eyebrow">A reuse-safety guardrail</div>
+      <h1>The line between reuse that <span class="hl">heals</span> and reuse that <span class="hl">harms</span> is a handful of numbers.</h1>
+      <p class="lede">OpenWASH holds those numbers honestly — the corroborated thresholds that separate safe reuse of human waste from a new disease vector — and puts them where the decision is made.</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Why it matters</div>
+      <h2>Closing the loop can feed people — or reinfect them.</h2>
+      <p>The suffering is fecal–oral disease. Diarrhea is still a leading killer of children under five, and soil-transmitted helminths — <em>Ascaris</em>, the roundworm this engine is built around — infect on the order of a billion people, stunting growth and cognition.</p>
+      <p>Reusing excreta as safe soil or fuel is one of the few things that makes sanitation affordable and <em>wanted</em> in poor places. But done wrong, reuse is a <strong>new disease vector</strong>: unsafe sludge on a food crop reinfects the very people it was meant to help. That failure is documented — deployed ecosan latrines in Malawi whose 12-month sludge still exceeded the safety limit.</p>
+      <p class="callout">The entire margin between helping and harming is a few safety numbers — and those numbers are scattered across dense PDFs, easy to get wrong, and exactly what an AI will confidently hallucinate.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">The guardrail</div>
+      <h2>An honest answer — including “I don’t know.”</h2>
+      <p>Describe what you have, how it was treated, and where it’s going. OpenWASH returns one of three verdicts, with the binding pathogen, the specific fix, and the limits it never hides. It says <strong>unsafe</strong> when it should, and <strong>not enough evidence</strong> when the science is thin — the opposite of a confident guess.</p>
+      <div class="verdicts">
+        <div class="verdict v-unsafe">
+          <div class="tag">UNSAFE</div>
+          <div class="case">faeces · 6-month passive storage · 25&nbsp;°C · crops eaten raw</div>
+          <p class="why"><b>Passive storage at 25&nbsp;°C needs ≥&nbsp;365 days to reach ≤1 viable egg/g; you have 180.</b> Add urine/urea/ash (pH ≥9) to sanitize far faster, or heat-compost ≥50&nbsp;°C. Deployed passive storage has under-performed in the field, so treat this bound as a floor.</p>
+        </div>
+        <div class="verdict v-safe">
+          <div class="tag">SAFE — by screen</div>
+          <div class="case">faecal sludge · urine/ash, pH 9.1 · 30&nbsp;°C · held 60 days</div>
+          <p class="why"><b>The ammonia dose clears Ascaris in ~29 days; you held 60.</b> Still a screen, not a certificate — confirm by measuring ≤1&nbsp;egg/g before reuse, and it says nothing about chemical hazards.</p>
+        </div>
+        <div class="verdict v-unknown">
+          <div class="tag">NOT ENOUGH EVIDENCE</div>
+          <div class="case">compost · held at 45&nbsp;°C</div>
+          <p class="why"><b>45&nbsp;°C sits in a gap with no robust helminth time–temperature curve in the evidence.</b> Reach and hold ≥50&nbsp;°C, or treat it as ambient storage instead. The tool refuses to invent a number it can’t source.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">The moat</div>
+      <h2>Numbers you can trust because you can check them.</h2>
+      <p>Every value is enforced against four rules. This is what makes the substrate different from a spreadsheet of thresholds — and what caught real over-claims in its own sources.</p>
+      <ul class="rules">
+        <li><span class="k">01 / provenance</span><span class="t"><b>No naked numbers.</b> Every value cites a source and page. A number without provenance never gets committed.</span></li>
+        <li><span class="k">02 / corroboration</span><span class="t"><b>Trust is computed, not asserted.</b> The engine counts independent source lineages — it caught a WHO target that looked triple-sourced but was one derivation echoed three times.</span></li>
+        <li><span class="k">03 / reality</span><span class="t"><b>Design target ≠ field-verified.</b> The guideline value and whether deployment actually achieves it are separate fields. One passes in the field; one is contradicted.</span></li>
+        <li><span class="k">04 / honesty</span><span class="t"><b>Contested values are surfaced, never averaged.</b> When two respected sources disagree, both are kept and resolved by policy — the average is nobody’s recommendation.</span></li>
+      </ul>
+      <div class="figs">
+        <div class="fig">
+          <div class="n">≤&nbsp;1<small> egg/g</small></div>
+          <div class="lab">Viable helminth eggs in treated faeces — the binding limit.</div>
+          <div class="src">WHO 2006 · multi-corroborated</div>
+        </div>
+        <div class="fig">
+          <div class="n">6–7<small> log</small></div>
+          <div class="lab">Pathogen reduction required for crops eaten raw.</div>
+          <div class="src">WHO 2006 · single lineage</div>
+        </div>
+        <div class="fig">
+          <div class="n">429<small> days</small></div>
+          <div class="lab">Ascaris T99 in stored sludge — the 2023 meta-analysis, longer than WHO’s optimistic estimate.</div>
+          <div class="src">Musaazi 2023 · N=56</div>
+        </div>
+        <div class="fig">
+          <div class="n">3<small> regimes</small></div>
+          <div class="lab">Sourced die-off models: ambient storage, ammonia amendment, thermal ≥50&nbsp;°C.</div>
+          <div class="src">WHO · Nordin · US EPA 503</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pull">
+    <div class="wrap">
+      <div class="eyebrow" style="margin-bottom:18px">The honest conclusion</div>
+      <p>Safe reuse of human waste is a subsidized public good — not a business that pays for itself.</p>
+      <p class="after">A full techno-economic study took one reuse pathway down to the pipe and the household fee. The engineering is cheap and solvable; treatment is a rounding error. No product pathway self-funds it — recovered nutrients have almost no market, and fuel covers a fraction. The honest question was never how to make it profitable. It’s <strong>who funds it</strong> — and increasingly, the sector agrees.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Where it fits</div>
+      <h2>The verification layer nobody else is building.</h2>
+      <p>WHO, EAWAG, and the ISO standards define the numbers — but ship them as prose PDFs and paywalled, lab-based certification. Nobody makes provenance, field-verification, and “not enough evidence” a first-class, open, point-of-decision tool. Meanwhile the sector is moving to <strong>outcome-based finance</strong> — governments and funders paying on <em>verified</em> safe outcomes — with no cheap, trustworthy way to verify them.</p>
+      <div class="fit">
+        <div class="row"><div class="who">Complements</div><div class="what"><b>WHO &amp; EAWAG</b> — the sourced authority OpenWASH cites and makes queryable.</div></div>
+        <div class="row"><div class="who">Complements</div><div class="what"><b>ISO 30500 / 31800</b> — lab certification of manufactured units; OpenWASH verifies reuse in the field.</div></div>
+        <div class="row"><div class="who">Serves</div><div class="what"><b>Results-based sanitation finance</b> — the record a funder needs to pay on verified outcomes.</div></div>
+        <div class="row"><div class="who">Fills</div><div class="what">The open, honesty-enforced reuse-safety gap — currently <b>unoccupied</b>.</div></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="foot-in">
+    <div class="eyebrow" style="margin-bottom:16px">Provenance &amp; terms</div>
+    <div class="ledger">
+      <div class="row"><span>sources</span><span>WHO · EAWAG/Sandec · Sphere · US&nbsp;EPA · peer-reviewed literature — cited, not rehosted</span></div>
+      <div class="row"><span>corroboration</span><span>adversarially verified against a 151-paper refutation scan; the core numbers held</span></div>
+      <div class="row"><span>license</span><span>Apache-2.0 (code) · CC&nbsp;BY&nbsp;4.0 (data &amp; docs)</span></div>
+      <div class="row"><span>status</span><span>v0.2 — validated substrate + usable guardrail + techno-economic proof-of-thesis</span></div>
+    </div>
+    <p class="disc">OpenWASH is a <strong>screen, not a certifier</strong>: it rules out unsafe designs and tells you what to measure — it is not a medical device, a guarantee of safety, or a substitute for testing before reuse. It is independent and not affiliated with or endorsed by any cited organization.</p>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    var b=document.getElementById('tt');
+    function cur(){var e=document.documentElement.getAttribute('data-theme');if(e)return e;return matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';}
+    b.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);b.textContent=n==='dark'?'light':'dark';});
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+OpenWASH
+Copyright 2026 OpenWASH contributors
+
+This product includes software licensed under the Apache License, Version 2.0
+(see LICENSE) and a curated dataset + documentation licensed under CC BY 4.0
+(see LICENSE-DATA).
+
+PROVENANCE
+----------
+OpenWASH curates SAFETY FACTS — thresholds, die-off constants, and reduction
+targets — extracted from and CITED TO their original sources (WHO, EAWAG/Sandec,
+Sphere, US EPA, and peer-reviewed literature; see data/sources.yaml). Those facts
+are not owned by OpenWASH.
+
+OpenWASH claims copyright only in its ORIGINAL selection, arrangement, schema,
+corroboration logic, and annotations — released under CC BY 4.0 (data/docs) and
+Apache-2.0 (code).
+
+Source documents remain under their own terms and are NOT redistributed in this
+repository. OpenWASH is independent and NOT affiliated with or endorsed by any
+cited organization.
+
+DISCLAIMER
+----------
+The engine is a SCREEN, not a certifier, and the reuse-safety guardrail is a
+decision aid — not a guarantee of safety, a medical device, or a substitute for
+measurement (see data/reuse_safety.yaml and engine/safe_reuse.py). Verify by
+testing before any reuse. Provided "AS IS" without warranty (see LICENSE).

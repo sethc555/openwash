@@ -1,0 +1,65 @@
+# OpenWASH — cost anchors (sourced, context-specific, PARTIAL)
+#
+# ⚠ Costs are the one dimension that does not generalize. Every figure here is
+# tied to a place, year, currency, and scope, and is NOT transferable to another
+# context without adjustment (labour rates, material prices, scale, exchange +
+# inflation). These are sourced INDICATIVE ANCHORS, not a universal per-technology
+# price list — the sanitation-cost literature offers methodologies and context-
+# bound case studies, not a clean normalized dataset (see README "Next"). Coverage
+# is deliberately partial: only what a source actually reports is recorded.
+#
+# Rule: compare figures only WITHIN the same source/context. Cross-source
+# comparison requires currency+year+scope normalization, which is NOT done here.
+
+meta:
+  status: partial
+  caveat: "context-specific; do not extrapolate across places/years without adjustment"
+
+# ── Per-technology unit capital cost anchors ──
+technology_costs:
+  - tech: S.3          # VIP toilet
+    kind: capital_per_unit
+    value: {amount: 348, currency: EUR, year: 2007}
+    scope: "one VIP toilet, first 1.2 m of pit lined; materials + labour"
+    place: "Lusaka, Zambia"
+    source: {ref: munch2007, locator: "Table 2"}
+  - tech: S.3
+    kind: capital_per_unit
+    value: {amount_range: [106, 211], currency: EUR, year: 2006}
+    scope: "VIP toilet"
+    place: "Uganda"
+    source: {ref: munch2007, locator: "cites Niwagaba et al. 2006"}
+  - tech: S.7          # dehydration-vault / UDD toilet
+    kind: capital_per_unit
+    value: {amount: 371, currency: EUR, year: 2007}
+    scope: "single-vault UDD toilet"
+    place: "Lusaka, Zambia"
+    source: {ref: munch2007, locator: "Table 2"}
+  - tech: S.7
+    kind: capital_per_unit
+    value: {amount_range: [296, 464], currency: EUR, year: 2006}
+    scope: "double-vault UDD toilet"
+    place: "Uganda"
+    source: {ref: munch2007, locator: "cites Niwagaba et al. 2006"}
+  - tech: S.7
+    kind: capital_per_unit
+    value: {amount: 632, currency: EUR, year: 2005}
+    scope: "double-vault UDD toilet (37,000 installed by eThekwini Municipality)"
+    place: "Durban, South Africa"
+    source: {ref: munch2007, locator: "cites Gounden 2006"}
+
+# ── Whole-system per-capita anchors (capital + annual O&M) ──
+system_costs:
+  - system: "VIP latrines + downstream co-composting (Münch Option 5)"
+    techs_like: [S.3, T.16, D.4]
+    capital: {amount: 31, unit: EUR_per_capita, year: 2007}
+    om:      {amount: 2.3, unit: EUR_per_capita_per_year, year: 2007}
+    place: "peri-urban Lusaka, Zambia"
+    source: {ref: munch2007, locator: "abstract; Table 6 financial model"}
+  - system: "UDD toilets + downstream processing (Münch Option 6, ecosan)"
+    techs_like: [U.2, S.7, S.1, D.3, D.2]
+    capital: {amount: 39, unit: EUR_per_capita, year: 2007}
+    om:      {amount: 2.1, unit: EUR_per_capita_per_year, year: 2007}
+    place: "peri-urban Lusaka, Zambia"
+    finding: "NPV only ~14% above the conventional VIP option and NOT statistically significant — i.e. ecosan is not more expensive than conventional low-cost onsite sanitation, contrary to common perception."
+    source: {ref: munch2007, locator: "abstract"}

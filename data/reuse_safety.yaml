@@ -1,0 +1,351 @@
+# OpenWASH v0.1 — Excreta / urine / wastewater reuse safety table
+#
+# The narrow, defensible first cut: the safety-critical thresholds that
+# separate a working nutrient-cycling (ecosan) design from a disease vector.
+#
+# Claim shapes (see data/README.md for the full model):
+#   value:          a single figure, corroborated by one or more sources
+#   contested:      respected sources DISAGREE — both kept, never averaged
+#   target_vs_field: design_target (guideline, under assumed conditions)
+#                    is kept SEPARATE from field (deployed/verified reality)
+#
+# Rules the engine enforces:
+#   - no naked numbers: every value block needs >=1 source with page/locator
+#   - tier is COMPUTED from distinct source lineages, not asserted
+#   - a source marked `restates:` does not count as independent corroboration
+
+meta:
+  id: reuse_safety
+  version: 0.1.0
+  binding_pathogen: Ascaris        # the hardest to kill; every storage/thermal rule is really an Ascaris-kill rule
+  health_target: "<=1e-6 DALY per person per year"
+
+claims:
+
+# ---- Health-based targets --------------------------------------------------
+- id: target_daly
+  category: health_target
+  parameter: Tolerable additional disease burden
+  value:
+    value: 1.0e-6
+    qualifier: "<="
+    unit: DALY/person/year
+    sources:
+      - {ref: who2006_vol4, page: 83}
+      - {ref: who2006_vol2, page: 86, locator: "Table 4.2"}
+      - {ref: who_ssp, locator: "glossary", restates: who_2006_reuse}
+    claimed_tier: multi_corroborated
+  notes: "Headline target. OCR mangles this as '10DALY'; read from PDF."
+
+- id: design_infection_risk_rotavirus
+  category: health_target
+  parameter: Design tolerable infection risk (rotavirus, index organism)
+  value:
+    value: 1.0e-3
+    unit: infections/person/year
+    sources: [{ref: who2006_vol2, page: 79, locator: "Table 3.19"}]
+    claimed_tier: single_sourced
+  notes: "Equivalent to the 1e-6 DALY target; gives the 6/7-log design targets."
+
+# ---- Verification thresholds (what 'treated' must measure) ------------------
+- id: verify_faeces_helminth
+  category: verification_threshold
+  parameter: Treated faeces/sludge — viable helminth eggs
+  value:
+    value: 1
+    qualifier: "<"
+    unit: egg/g total solids
+    sources:
+      - {ref: who2006_vol4, page: 84}
+      - {ref: eawag_compendium, page: 132, locator: "T.16 Co-Composting", restates: who_2006_reuse}
+    claimed_tier: multi_corroborated
+  notes: "The famous <=1 egg/g. Binding = Ascaris. Compendium cites WHO, not independent."
+
+- id: verify_faeces_ecoli
+  category: verification_threshold
+  parameter: Treated faeces/sludge — E. coli
+  value:
+    value: 1000
+    qualifier: "<"
+    unit: CFU/g total solids
+    sources: [{ref: who2006_vol4, page: 84}]
+    claimed_tier: single_sourced
+
+- id: verify_wastewater_unrestricted_helminth
+  category: verification_threshold
+  parameter: Wastewater, unrestricted irrigation — helminth eggs
+  value:
+    value: 1
+    qualifier: "<="
+    unit: egg/L
+    sources:
+      - {ref: who2006_vol2, page: 85, locator: "Table 4.1"}
+      - {ref: who2006_vol4, page: 84}
+    claimed_tier: multi_corroborated
+  notes: "Mean over season, met in >=90% of samples."
+
+- id: verify_children_tighten
+  category: verification_threshold
+  parameter: Helminth limit where children <15 are exposed
+  value:
+    value: 0.1
+    qualifier: "<="
+    unit: egg/L
+    sources: [{ref: who2006_vol2, page: 85, locator: "Table 4.1"}]
+    claimed_tier: single_sourced
+
+# ---- Required pathogen reduction by exposure scenario ----------------------
+- id: logred_unrestricted_leaf
+  category: log_reduction_requirement
+  parameter: Required pathogen reduction
+  scenario: {use: unrestricted_irrigation, crop: leaf}
+  value:
+    value: 6
+    unit: log10
+    sources:
+      - {ref: who2006_vol4, page: 85}
+      - {ref: who2006_vol2, page: 85, locator: "Table 4.1"}
+      - {ref: who_ssp, locator: "Fig 4.1", restates: who_2006_reuse}
+    claimed_tier: multi_corroborated       # engine will DOWNGRADE this — 3 docs, 1 lineage
+  notes: "Rotavirus index. Lettuce. My synthesis over-claimed '3 independent'; see computed tier."
+
+- id: logred_unrestricted_root
+  category: log_reduction_requirement
+  parameter: Required pathogen reduction
+  scenario: {use: unrestricted_irrigation, crop: root}
+  value:
+    value: 7
+    unit: log10
+    sources:
+      - {ref: who2006_vol4, page: 85}
+      - {ref: who2006_vol2, page: 85, locator: "Table 4.1"}
+      - {ref: who_ssp, locator: "Fig 4.1", restates: who_2006_reuse}
+    claimed_tier: multi_corroborated
+  notes: "Onions. Highest crop requirement."
+
+- id: logred_restricted_labour
+  category: log_reduction_requirement
+  parameter: Required pathogen reduction
+  scenario: {use: restricted_irrigation, labour: labour_intensive}
+  value: {value: 4, unit: log10, sources: [{ref: who2006_vol2, page: 85, locator: "Table 4.1"}], claimed_tier: single_sourced}
+
+- id: logred_restricted_mechanized
+  category: log_reduction_requirement
+  parameter: Required pathogen reduction
+  scenario: {use: restricted_irrigation, labour: highly_mechanized}
+  value: {value: 3, unit: log10, sources: [{ref: who2006_vol2, page: 85, locator: "Table 4.1"}], claimed_tier: single_sourced}
+
+- id: logred_drip_low
+  category: log_reduction_requirement
+  parameter: Required pathogen reduction
+  scenario: {use: localized_drip, crop: low_growing}
+  value: {value: 4, unit: log10, sources: [{ref: who2006_vol2, page: 85, locator: "Table 4.1"}], claimed_tier: single_sourced}
+
+- id: logred_drip_high
+  category: log_reduction_requirement
+  parameter: Required pathogen reduction
+  scenario: {use: localized_drip, crop: high_growing}
+  value: {value: 2, unit: log10, sources: [{ref: who2006_vol2, page: 85, locator: "Table 4.1"}], claimed_tier: single_sourced}
+
+# ---- Multi-barrier log credits (how to reach the required total) -----------
+- id: barrier_treatment
+  category: barrier_credit
+  parameter: "Barrier: wastewater treatment"
+  value: {value: {min: 1, max: 6}, unit: log10, sources: [{ref: who2006_vol2, page: 89, locator: "Table 4.3"}], claimed_tier: single_sourced}
+- id: barrier_dieoff
+  category: barrier_credit
+  parameter: "Barrier: pathogen die-off on crop (per day withheld before harvest)"
+  value: {value: {min: 0.5, max: 2}, unit: log10/day, sources: [{ref: who2006_vol2, page: 89, locator: "Table 4.3"}], claimed_tier: single_sourced}
+- id: barrier_drip_low
+  category: barrier_credit
+  parameter: "Barrier: drip irrigation, low-growing crops"
+  value: {value: 2, unit: log10, sources: [{ref: who2006_vol2, page: 89, locator: "Table 4.3"}], claimed_tier: single_sourced}
+- id: barrier_drip_high
+  category: barrier_credit
+  parameter: "Barrier: drip irrigation, high-growing crops"
+  value: {value: 4, unit: log10, sources: [{ref: who2006_vol2, page: 89, locator: "Table 4.3"}], claimed_tier: single_sourced}
+- id: barrier_washing
+  category: barrier_credit
+  parameter: "Barrier: produce washing with clean water"
+  value: {value: 1, unit: log10, sources: [{ref: who2006_vol2, page: 89, locator: "Table 4.3"}], claimed_tier: single_sourced}
+- id: barrier_disinfection
+  category: barrier_credit
+  parameter: "Barrier: produce disinfection"
+  value: {value: 2, unit: log10, sources: [{ref: who2006_vol2, page: 89, locator: "Table 4.3"}], claimed_tier: single_sourced}
+- id: barrier_peeling
+  category: barrier_credit
+  parameter: "Barrier: produce peeling"
+  value: {value: 2, unit: log10, sources: [{ref: who2006_vol2, page: 89, locator: "Table 4.3"}], claimed_tier: single_sourced}
+- id: barrier_cooking
+  category: barrier_credit
+  parameter: "Barrier: cooking"
+  value: {value: {min: 6, max: 7}, unit: log10, sources: [{ref: who2006_vol2, page: 89, locator: "Table 4.3"}], claimed_tier: single_sourced}
+- id: barrier_ppe
+  category: barrier_credit
+  parameter: "Barrier: PPE / handwashing"
+  value: {value: "recommended but NOT credited as a log reduction", unit: none, sources: [{ref: who_ssp, locator: "Guidance Note 4.1"}], claimed_tier: single_sourced}
+
+# ---- Storage / thermal sanitization: design target vs deployed reality ------
+- id: composting_thermophilic
+  category: storage_sanitization
+  parameter: Thermophilic composting to sanitize excreta/faecal sludge
+  target_vs_field:
+    design_target:
+      value: ">50 C for >1 week"
+      unit: temp_time
+      sources: [{ref: who2006_vol4, page: 89}, {ref: eawag_compendium, page: 146, locator: "D.4", restates: who_2006_reuse}]
+      claimed_tier: single_sourced
+    field:
+      status: corroborated
+      finding: "Engineered piles (FS + bulking agent, turned 7-daily) held 48-60 C for >38 d over 8 wk -> complete sanitization incl. viable helminth eggs."
+      sources: [{ref: manga2020, locator: "results"}]
+      tier: field_corroborated
+      caveat: "Tropical-climate composting die-off is a recognised data gap (manga2023). Holds WHEN the thermophilic regime is actually reached and held uniformly."
+  notes: "This is genuinely multi-lineage: WHO guideline + independent Manga field study agree."
+
+- id: storage_passive_ambient
+  category: storage_sanitization
+  parameter: Ambient/passive storage to sanitize dry excreta (no fresh additions)
+  target_vs_field:
+    design_target:
+      value:
+        - {condition: "2-20 C", time: "1.5-2 years"}
+        - {condition: ">20-35 C", time: ">1 year"}
+        - {condition: "pH>9 (alkaline)", time: ">6 months"}
+      unit: temp_time
+      sources: [{ref: who2006_vol4, page: 90, locator: "Table 4.5"}, {ref: eawag_compendium, page: 70, locator: "S.7/D.3", restates: who_2006_reuse}]
+      claimed_tier: single_sourced
+    field:
+      status: contradicted
+      finding: "Deployed EcoSan latrines (Malawi), 12 mo post-sealing: hookworm 5-10 eggs/g (limit <=1); Ascaris still >1 egg/g in 12% of units (ROSE 1.5->2.3 before falling); Salmonella INCREASED 71->456 CFU/g (regrowth). Units never reached assumed regime: pH 8.7 not >12; NH3 ~90 not ~280 mg/L; no thermophilic phase."
+      sources: [{ref: kumwenda2019, locator: "12-mo follow-up"}]
+      tier: field_contradicted
+      caveat: "Authors: ~6-month guidance is INSUFFICIENT; even >=12 mo did not fully sanitize. Single n=35 one-country study: strong existence proof of harm, weak as a distribution."
+  notes: "THE reason design_target and field are separate fields. Do not ship the design number as a guarantee."
+
+- id: urine_storage
+  category: storage_sanitization
+  parameter: Urine storage to permit unrestricted crop use
+  value:
+    value: "20 C for >=6 months -> all crops (>=1 month -> processed crops only; own-household use -> no storage)"
+    unit: temp_time
+    sources:
+      - {ref: who2006_vol4, page: 91, locator: "Table 4.6"}
+      - {ref: eawag_compendium, page: 58, locator: "S.1/D.2", restates: who_2006_reuse}
+    claimed_tier: multi_corroborated
+  notes: "Do NOT dilute stored urine; do not use near Schistosoma haematobium waters."
+
+# ---- Siting constraints (the 'just dig a trench' bounds) --------------------
+- id: siting_setback_from_water
+  category: siting_constraint
+  parameter: Minimum horizontal setback of pit/latrine from any drinking-water source
+  value:
+    value: 30
+    qualifier: ">="
+    unit: m
+    sources:
+      - {ref: sphere2018, page: 115, locator: "Excreta std 3.1"}
+      - {ref: eawag_compendium, page: 60, locator: "S.2/S.3/D.7/D.8"}
+    claimed_tier: multi_corroborated
+  notes: "Default when no infiltration test; increase in fissured rock/limestone, decrease in fine soils."
+
+- id: siting_clearance_water_table
+  category: siting_constraint
+  parameter: Minimum vertical clearance, pit bottom above wet-season groundwater table
+  contested:
+    candidates:
+      - {value: 1.5, unit: m, sources: [{ref: sphere2018, page: 115, locator: "Excreta std 3.1"}]}
+      - {value: 2.0, unit: m, sources: [{ref: eawag_compendium, page: 60, locator: "S.2 Single Pit"}]}
+    resolution: use_most_conservative
+    resolved: {value: 2.0, unit: m}
+  notes: "Genuine 0.5 m disagreement between two respected sources. 1.75 m (the average) is nobody's recommendation. Both are defaults-when-no-infiltration-test."
+
+# ---- Die-off constants (constraint-engine formula seeds) --------------------
+- id: t90_ascaris_faeces
+  category: dieoff_constant
+  parameter: Ascaris T90 (time for 1-log / 90% die-off) in faeces
+  value: {value: {mean: 125, sd: 30}, unit: days, sources: [{ref: who2006_vol4, page: 59, locator: "Table 3.5"}], claimed_tier: single_sourced}
+  notes: "THE binding constraint. 2-4x more persistent than any bacterium or virus."
+- id: t90_ascaris_soil
+  category: dieoff_constant
+  parameter: Ascaris T90 in soil
+  value: {value: {mean: 625, sd: 150}, unit: days, sources: [{ref: who2006_vol4, page: 59, locator: "Table 3.5"}], claimed_tier: single_sourced}
+- id: t90_salmonella_faeces
+  category: dieoff_constant
+  parameter: Salmonella T90 in faeces
+  value: {value: {mean: 30, sd: 8}, unit: days, sources: [{ref: who2006_vol4, page: 59, locator: "Table 3.5"}], claimed_tier: single_sourced}
+- id: t90_rotavirus_faeces
+  category: dieoff_constant
+  parameter: Rotavirus T90 in faeces
+  value: {value: {mean: 60, sd: 16}, unit: days, sources: [{ref: who2006_vol4, page: 59, locator: "Table 3.5"}], claimed_tier: single_sourced}
+- id: t90_cryptosporidium_faeces
+  category: dieoff_constant
+  parameter: Cryptosporidium T90 in faeces
+  value: {value: {mean: 70, sd: 20}, unit: days, sources: [{ref: who2006_vol4, page: 59, locator: "Table 3.5"}], claimed_tier: single_sourced}
+- id: t90_ehec_faeces
+  category: dieoff_constant
+  parameter: EHEC (E. coli O157) T90 in faeces
+  value: {value: {mean: 20, sd: 4}, unit: days, sources: [{ref: who2006_vol4, page: 59, locator: "Table 3.5"}], claimed_tier: single_sourced}
+- id: t90_hepatitisA_faeces
+  category: dieoff_constant
+  parameter: Hepatitis A virus T90 in faeces
+  value: {value: {mean: 55, sd: 18}, unit: days, sources: [{ref: who2006_vol4, page: 59, locator: "Table 3.5"}], claimed_tier: single_sourced}
+- id: t90_giardia_faeces
+  category: dieoff_constant
+  parameter: Giardia T90 in faeces
+  value: {value: {mean: 27.5, sd: 9}, unit: days, sources: [{ref: who2006_vol4, page: 59, locator: "Table 3.5"}], claimed_tier: single_sourced}
+- id: t90_salmonella_soil
+  category: dieoff_constant
+  parameter: Salmonella T90 in soil
+  value: {value: {mean: 35, sd: 6}, unit: days, sources: [{ref: who2006_vol4, page: 59, locator: "Table 3.5"}], claimed_tier: single_sourced}
+
+# ---- wastewater treatment verification (E. coli by irrigation option) -------
+- id: verify_ecoli_unrestricted_root
+  category: verification_threshold
+  parameter: E. coli verification — unrestricted, root crops (Option A, 4 log)
+  value: {value: 1000, qualifier: "<=", unit: CFU/100mL, sources: [{ref: who2006_vol2, page: 95, locator: "Table 4.5"}], claimed_tier: single_sourced}
+- id: verify_ecoli_unrestricted_leaf
+  category: verification_threshold
+  parameter: E. coli verification — unrestricted, leaf crops (Option B, 3 log)
+  value: {value: 10000, qualifier: "<=", unit: CFU/100mL, sources: [{ref: who2006_vol2, page: 95, locator: "Table 4.5"}], claimed_tier: single_sourced}
+- id: verify_ecoli_restricted_mechanized
+  category: verification_threshold
+  parameter: E. coli verification — restricted, highly mechanized (Option G)
+  value: {value: 100000, qualifier: "<=", unit: CFU/100mL, sources: [{ref: who2006_vol2, page: 95, locator: "Table 4.5"}], claimed_tier: single_sourced}
+
+# ---- helminth treatment requirement (Table 4.4) ----------------------------
+- id: helminth_treatment_required
+  category: log_reduction_requirement
+  parameter: Helminth-egg reduction required by treatment vs raw wastewater load
+  value:
+    value:
+      - {raw_eggs_per_L: 1000, treatment_log: 3}
+      - {raw_eggs_per_L: 100, treatment_log: 2}
+      - {raw_eggs_per_L: 10, treatment_log: 1}
+    unit: log10
+    sources: [{ref: who2006_vol2, page: 93, locator: "Table 4.4"}]
+    claimed_tier: single_sourced
+  notes: "All target verification <=1 egg/L. Produce washing adds 1 log if raw load higher."
+
+# ---- cross-contamination loads (why urine/greywater need far less treatment) -
+- id: crosscontamination_urine
+  category: verification_threshold
+  parameter: Faecal cross-contamination of source-separated urine
+  value: {value: {mean: 9.1, sd: 5.6}, unit: mg faeces/L urine, sources: [{ref: who2006_vol4, page: 85}], claimed_tier: single_sourced}
+  notes: "~5 log lower pathogen conc. than faeces -> urine typically needs only 2 log."
+- id: crosscontamination_greywater
+  category: verification_threshold
+  parameter: Greywater faecal load
+  value: {value: 0.04, unit: g faeces/person/day, sources: [{ref: who2006_vol4, page: 85}], claimed_tier: single_sourced}
+  notes: "~1000-fold lower risk than wastewater."
+
+# ---- aerated-pile composting (design target, an alternative thermal route) --
+- id: composting_aerated_pile
+  category: storage_sanitization
+  parameter: Aerated-pile composting to sanitize excreta
+  value:
+    value: "55-60 C for 1 month + 2-4 months maturation"
+    unit: temp_time
+    sources: [{ref: who2006_vol4, page: 84}]
+    claimed_tier: single_sourced
+  notes: "Alternative to the >50 C / >1 week minimum; more margin."

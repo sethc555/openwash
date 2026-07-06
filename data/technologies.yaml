@@ -1,0 +1,686 @@
+# OpenWASH — technology catalog (normalized from the EAWAG Compendium 2nd ed)
+#
+# A queryable, provenance-tagged slice of the Compendium's 57 technologies —
+# structured around the attributes that DISQUALIFY a technology at a site
+# (water table, land, skilled labour, power, water, scale). This is the
+# capability-query backbone: given site constraints, which technologies fit?
+#
+# `reuse_products` links a technology's outputs to the reuse-safety layer
+# (data/reuse_safety.yaml + engine/dieoff.py) — so selection and safety are
+# one system.
+#
+# Provenance: every technology cites its Compendium page. Numeric siting/land
+# values are from the source sheet; `skilled_labour` / `land_demand` levels are
+# the curator's classification of the sheet's prose (marked, not sourced).
+
+meta:
+  source: eawag_compendium
+  functional_groups:
+    U: User Interface
+    S: Collection & Storage/Treatment
+    C: Conveyance
+    T: (Semi-)Centralized Treatment
+    D: Use and/or Disposal
+  # engine heuristics (NOT source data) used by select.py when a site supplies
+  # a value the source expresses only qualitatively:
+  heuristics:
+    land_demand_high_threshold_m2_per_capita: 3   # 'high land_demand' disqualified below this
+
+technologies:
+
+  - id: U.1
+    name: Dry Toilet
+    group: U
+    scale: [household]
+    inputs: [faeces, urine]
+    outputs: [excreta]
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: low}
+    siting: {}
+    notes: "No urine diversion; mixed excreta drops to a pit/vault below. Waterless."
+    source: {ref: eawag_compendium, page: 44}
+
+  - id: U.2
+    name: Urine-Diverting Dry Toilet (UDDT)
+    group: U
+    scale: [household, small_community]
+    inputs: [faeces, urine]
+    outputs: [faeces, urine]                       # diverts the two streams — each routed downstream
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: low}
+    siting: {}                                    # no deep pit — key advantage
+    notes: "Waterless, above-ground. Diverts urine from faeces. Works where the water table is HIGH."
+    source: {ref: eawag_compendium, page: 46}
+
+  - id: S.1
+    name: Urine Storage Tank / Container
+    group: S
+    scale: [household, small_community, community]
+    inputs: [urine]
+    outputs: [stored_urine]
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: low}
+    siting: {}
+    notes: "Store ≥1 mo (≥6 mo for full sanitization); ~1.2 L urine/person/day."
+    source: {ref: eawag_compendium, page: 58}
+
+  - id: U.4
+    name: Pour Flush Toilet
+    group: U
+    scale: [household]
+    inputs: [faeces, urine, flushwater]
+    outputs: [blackwater]
+    reuse_products: []
+    requires: {water: true, power: false, skilled_labour: low}
+    siting: {}
+    notes: "~2–3 L/flush. Needs a reliable small water supply."
+    source: {ref: eawag_compendium, page: 50}
+
+  - id: S.2
+    name: Single Pit
+    group: S
+    scale: [household]
+    inputs: [excreta, blackwater, faeces]
+    outputs: [sludge]
+    reuse_products: [sludge]
+    requires: {water: false, power: false, skilled_labour: low}
+    siting: {pit_depth_m: 3, clearance_above_water_table_m: 2, setback_from_water_m: 30}
+    notes: "40–60 L/person/yr solids; lasts 20+ yr. Deep pit — disqualified by a high water table."
+    source: {ref: eawag_compendium, page: 60}
+
+  - id: S.3
+    name: Single Ventilated Improved Pit (VIP)
+    group: S
+    scale: [household, small_community]
+    inputs: [excreta, blackwater, faeces]
+    outputs: [sludge]
+    reuse_products: [sludge]
+    requires: {water: false, power: false, skilled_labour: low}
+    siting: {pit_depth_m: 3, clearance_above_water_table_m: 2, setback_from_water_m: 30}
+    notes: "Vent pipe controls odour/flies. Deep pit — water-table sensitive."
+    source: {ref: eawag_compendium, page: 62}
+
+  - id: S.5
+    name: Fossa Alterna (alternating shallow double pit)
+    group: S
+    scale: [household]
+    inputs: [excreta, faeces, organics]
+    outputs: [pit_humus]
+    reuse_products: [pit_humus]
+    requires: {water: false, power: false, skilled_labour: low}
+    siting: {pit_depth_m: 1.5, clearance_above_water_table_m: 2, setback_from_water_m: 30}
+    notes: "Max 1.5 m deep (shallower → tolerates a higher water table than S.2/S.3); ~1 yr/pit for family of 6."
+    source: {ref: eawag_compendium, page: 66}
+
+  - id: S.7
+    name: Dehydration Vaults
+    group: S
+    scale: [household]
+    inputs: [faeces]
+    outputs: [dried_faeces]
+    reuse_products: [dried_faeces]
+    requires: {water: false, power: false, skilled_labour: low}
+    siting: {}
+    notes: "Above-ground; ash/lime dosing. High-water-table OK. WHO storage 6 mo (ash) → 1.5–2 yr (cold)."
+    source: {ref: eawag_compendium, page: 70}
+
+  - id: S.8
+    name: Composting Chamber
+    group: S
+    scale: [household, small_community]
+    inputs: [excreta, faeces, organics]
+    outputs: [compost]
+    reuse_products: [compost]
+    requires: {water: false, power: false, skilled_labour: medium}
+    siting: {}
+    notes: "Above-ground; moisture 45–70%, 40–50 °C, C:N 25:1. Needs active management to reach temp."
+    source: {ref: eawag_compendium, page: 72}
+
+  - id: S.9
+    name: Septic Tank
+    group: S
+    scale: [household, small_community]
+    inputs: [blackwater, brownwater, greywater]
+    outputs: [effluent, sludge]
+    reuse_products: [sludge, effluent]
+    requires: {water: true, power: false, skilled_labour: low}
+    performance: {SS_removal_pct: 50, BOD_removal_pct: [30, 40], ecoli_log: 1}
+    siting: {}
+    notes: "HRT 48 h; effluent needs further treatment/infiltration. Poor pathogen removal (1 log)."
+    source: {ref: eawag_compendium, page: 74}
+
+  - id: S.10
+    name: Anaerobic Baffled Reactor (ABR)
+    group: S
+    scale: [small_community, community]
+    inputs: [blackwater, brownwater, greywater]
+    outputs: [effluent, sludge]
+    reuse_products: [sludge, effluent]
+    requires: {water: true, power: false, skilled_labour: medium}
+    performance: {BOD_removal_pct: 90}
+    siting: {}
+    notes: "2–200 m³/d; HRT 48–72 h; 3–6 chambers. Needs skilled construction/desludging."
+    source: {ref: eawag_compendium, page: 76}
+
+  - id: S.12
+    name: Biogas Reactor
+    group: S
+    scale: [household, community]
+    inputs: [sludge, blackwater, brownwater, organics]
+    outputs: [sludge, biogas]
+    reuse_products: [sludge]
+    requires: {water: false, power: false, skilled_labour: medium}
+    siting: {}
+    constraints: {min_ambient_temp_C: 15}
+    notes: "Mesophilic 30–38 °C; HRT ≥15 d (hot) / 25 d (temperate). Poor performance below 15 °C."
+    source: {ref: eawag_compendium, page: 80}
+
+  - id: T.5
+    name: Waste Stabilization Ponds (WSP)
+    group: T
+    scale: [community]
+    inputs: [blackwater, effluent]
+    outputs: [effluent, sludge]
+    reuse_products: [effluent, sludge]
+    requires: {water: true, power: false, skilled_labour: low}
+    land_demand: high
+    performance: {BOD_removal_pct: [60, 75], pathogen: "maturation pond removes pathogens"}
+    siting: {}
+    notes: "≥3 ponds in series; low-skill, low-energy, but LAND-HUNGRY. Good pathogen removal in maturation ponds."
+    source: {ref: eawag_compendium, page: 110}
+
+  - id: T.8
+    name: Horizontal Subsurface Flow Constructed Wetland
+    group: T
+    scale: [small_community, community]
+    inputs: [effluent, blackwater, brownwater, greywater]
+    outputs: [effluent, biomass]
+    reuse_products: [effluent]
+    requires: {water: true, power: false, skilled_labour: low}
+    land_m2_per_capita: {value: {min: 5, max: 10}, source: {ref: eawag_compendium, page: 116}}
+    siting: {}
+    notes: "5–10 m²/person; gravel 3–32 mm, bed 0.5–1 m. Low-energy but land-intensive."
+    source: {ref: eawag_compendium, page: 116}
+
+  - id: T.9
+    name: Vertical Flow Constructed Wetland
+    group: T
+    scale: [small_community, community]
+    inputs: [effluent, blackwater, brownwater, greywater]
+    outputs: [effluent, biomass]
+    reuse_products: [effluent]
+    requires: {water: true, power: false, skilled_labour: medium}
+    land_m2_per_capita: {value: {min: 1, max: 3}, source: {ref: eawag_compendium, page: 118}}
+    siting: {}
+    notes: "1–3 m²/person (less land than HF); nitrifies; needs 4–10 dosing cycles/day."
+    source: {ref: eawag_compendium, page: 118}
+
+  - id: T.11
+    name: Upflow Anaerobic Sludge Blanket (UASB)
+    group: T
+    scale: [community]
+    inputs: [blackwater, brownwater, greywater]
+    outputs: [effluent, sludge, biogas]
+    reuse_products: [effluent, sludge]
+    requires: {water: true, power: false, skilled_labour: high}
+    performance: {COD_removal_pct: [80, 90]}
+    siting: {}
+    notes: "Compact, recovers biogas, but needs skilled operation (granule/upflow control)."
+    source: {ref: eawag_compendium, page: 122}
+
+  - id: T.12
+    name: Activated Sludge
+    group: T
+    scale: [community]
+    inputs: [effluent, blackwater, brownwater, greywater]
+    outputs: [effluent, sludge]
+    reuse_products: [effluent, sludge]
+    requires: {water: true, power: true, skilled_labour: high}
+    performance: {BOD_and_pathogen_removal_pct: 99}
+    siting: {}
+    notes: "Up to 99% removal but needs continuous POWER + skilled operators. Not appropriate off-grid."
+    source: {ref: eawag_compendium, page: 124}
+
+  - id: D.2
+    name: Application of Stored Urine
+    group: D
+    scale: [household, community]
+    inputs: [stored_urine]
+    outputs: [biomass]
+    reuse_products: [urine]
+    requires: {water: false, power: false, skilled_labour: low, reuse_land: true}
+    siting: {}
+    notes: "~40–110 kg N/ha; store ≥1 mo (≥6 mo if others eat the crop — see reuse_safety urine_storage)."
+    source: {ref: eawag_compendium, page: 142}
+
+  - id: D.4
+    name: Application of Compost / Pit Humus
+    group: D
+    scale: [household, community]
+    inputs: [compost, pit_humus]
+    outputs: [biomass]
+    reuse_products: [compost]
+    requires: {water: false, power: false, skilled_labour: low, reuse_land: true}
+    siting: {}
+    notes: "WHO ≥50 °C for ≥1 week to sanitize (see reuse_safety composting_thermophilic + dieoff engine)."
+    source: {ref: eawag_compendium, page: 146}
+
+  - id: D.7
+    name: Soak Pit
+    group: D
+    scale: [household]
+    inputs: [effluent, greywater, urine]
+    outputs: []
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: low, permeable_soil: true}
+    siting: {pit_depth_m: 2.5, clearance_above_water_table_m: 2, setback_from_water_m: 30}
+    notes: "Infiltrates pre-settled effluent; 1.5–4 m deep. Disqualified by a high water table or fine/impermeable soil."
+    source: {ref: eawag_compendium, page: 152}
+
+  - id: D.3
+    name: Application of Dehydrated Faeces
+    group: D
+    scale: [household, community]
+    inputs: [dried_faeces]
+    outputs: [biomass]
+    reuse_products: [dried_faeces]
+    requires: {water: false, power: false, skilled_labour: low, reuse_land: true}
+    siting: {}
+    notes: "Store 6–24 mo per WHO before use (Ascaris). See reuse_safety storage_passive_ambient + dieoff screen."
+    source: {ref: eawag_compendium, page: 144}
+
+  - id: D.5
+    name: Application of Sludge
+    group: D
+    scale: [community]
+    inputs: [biosolids]
+    outputs: [biomass]
+    reuse_products: [biosolids]
+    requires: {water: false, power: false, skilled_labour: low, reuse_land: true}
+    siting: {}
+    notes: "Only treated/dewatered sludge; verify <1 helminth egg/g TS before land application."
+    source: {ref: eawag_compendium, page: 148}
+
+  - id: D.6
+    name: Irrigation (reuse of effluent)
+    group: D
+    scale: [household, community]
+    inputs: [effluent]
+    outputs: [biomass]
+    reuse_products: [effluent]
+    requires: {water: false, power: false, skilled_labour: low, reuse_land: true}
+    siting: {}
+    notes: "Effluent must meet the required log reduction (6–7 unrestricted). Drip for edible crops."
+    source: {ref: eawag_compendium, page: 150}
+
+  - id: D.8
+    name: Leach Field
+    group: D
+    scale: [household, small_community]
+    inputs: [effluent]
+    outputs: []
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: low, permeable_soil: true}
+    siting: {pit_depth_m: 1.5, clearance_above_water_table_m: 2, setback_from_water_m: 30}
+    notes: "Subsurface trenches; disqualified by a high water table or impermeable soil."
+    source: {ref: eawag_compendium, page: 154}
+
+  - id: D.13
+    name: Biogas Combustion
+    group: D
+    scale: [household, community]
+    inputs: [biogas]
+    outputs: []
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: low}
+    siting: {}
+    notes: "Terminal energy use; methane 55–75%, ~6 kWh/m³."
+    source: {ref: eawag_compendium, page: 164}
+
+  - id: D.12
+    name: Surface Disposal & Storage (landfill / stockpile)
+    group: D
+    scale: [household, small_community, community]
+    inputs: [sludge, biosolids, compost, dried_faeces, pit_humus]
+    outputs: []
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: low}
+    siting: {}
+    notes: "Non-reuse terminal for treated solids where no reuse land is available (landfill/stockpile). No nutrient recovery — a fallback, not the goal."
+    source: {ref: eawag_compendium, page: 162}
+
+  # ── Conveyance (C) — bridge onsite collection to a managed OFFSITE service.
+  #    Modeled as terminals that hand the product off to offsite FSM/sewerage;
+  #    they require the site to actually HAVE that service (`offsite_service`).
+  - id: C.2
+    name: Human-Powered Emptying & Transport (to offsite)
+    group: C
+    scale: [household, small_community, community]
+    inputs: [sludge, dried_faeces, compost, pit_humus]
+    outputs: []
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: low, offsite_service: true}
+    siting: {}
+    notes: "Manual pit emptying + cartage to a transfer station/treatment. Needs a functioning offsite FSM chain."
+    source: {ref: eawag_compendium, page: 86}
+
+  - id: C.3
+    name: Motorized Emptying & Transport (to offsite)
+    group: C
+    scale: [small_community, community]
+    inputs: [sludge, blackwater, effluent, urine, biosolids, pit_humus]
+    outputs: []
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: low, offsite_service: true}
+    siting: {}
+    notes: "Vacuum truck (3–12 m³) hauls to an offsite treatment/reuse facility. The realistic dense-urban path when there is no on-site reuse land."
+    source: {ref: eawag_compendium, page: 88}
+
+  - id: C.4
+    name: Simplified Sewer (to offsite treatment)
+    group: C
+    scale: [small_community, community]
+    inputs: [blackwater, brownwater, greywater, effluent]
+    outputs: []
+    reuse_products: []
+    requires: {water: true, power: false, skilled_labour: medium, offsite_service: true}
+    siting: {}
+    notes: "Small-bore condominial sewer; needs downstream (semi-)centralized treatment to exist."
+    source: {ref: eawag_compendium, page: 90}
+
+  - id: C.6
+    name: Conventional Gravity Sewer (to offsite treatment)
+    group: C
+    scale: [community]
+    inputs: [blackwater, greywater]
+    outputs: []
+    reuse_products: []
+    requires: {water: true, power: false, skilled_labour: high, offsite_service: true}
+    siting: {}
+    notes: "Capital-intensive; requires a centralized treatment plant downstream."
+    source: {ref: eawag_compendium, page: 94}
+
+  # ── Additional onsite storage/treatment & use technologies ──
+  - id: S.4
+    name: Double Ventilated Improved Pit (VIP)
+    group: S
+    scale: [household]
+    inputs: [excreta, faeces]
+    outputs: [pit_humus]
+    reuse_products: [pit_humus]
+    requires: {water: false, power: false, skilled_labour: low}
+    siting: {pit_depth_m: 3, clearance_above_water_table_m: 2, setback_from_water_m: 30}
+    notes: "Alternating pits; rest ≥1–2 yr → pit humus. Water-table sensitive (deep pit)."
+    source: {ref: eawag_compendium, page: 64}
+
+  - id: S.11
+    name: Anaerobic Filter
+    group: S
+    scale: [small_community, community]
+    inputs: [blackwater, brownwater, greywater]
+    outputs: [effluent, sludge]
+    reuse_products: [sludge, effluent]
+    requires: {water: true, power: false, skilled_labour: medium}
+    performance: {SS_BOD_removal_pct: [50, 80]}
+    siting: {}
+    notes: "Fixed-film reactor; HRT 12–36 h; start-up 6–9 months."
+    source: {ref: eawag_compendium, page: 78}
+
+  - id: T.1
+    name: Settler (primary sedimentation)
+    group: T
+    scale: [small_community, community]
+    inputs: [blackwater, brownwater, greywater]
+    outputs: [effluent, sludge]
+    reuse_products: [sludge]
+    requires: {water: true, power: false, skilled_labour: low}
+    performance: {SS_removal_pct: [50, 70], BOD_removal_pct: [20, 40]}
+    siting: {}
+    notes: "Primary treatment; HRT 1.5–2.5 h. Needs downstream treatment of the effluent."
+    source: {ref: eawag_compendium, page: 102}
+
+  - id: T.2
+    name: Imhoff Tank
+    group: T
+    scale: [small_community, community]
+    inputs: [blackwater, brownwater, greywater]
+    outputs: [effluent, sludge]
+    reuse_products: [sludge]
+    requires: {water: true, power: false, skilled_labour: medium}
+    performance: {SS_removal_pct: [50, 70], COD_removal_pct: [25, 50]}
+    siting: {}
+    notes: "Combined settling + digestion; 50–20,000 PE."
+    source: {ref: eawag_compendium, page: 104}
+
+  - id: T.10
+    name: Trickling Filter
+    group: T
+    scale: [community]
+    inputs: [effluent, brownwater, greywater]
+    outputs: [effluent, sludge]
+    reuse_products: [effluent, sludge]
+    requires: {water: true, power: true, skilled_labour: medium}
+    performance: {nitrification: efficient}
+    siting: {}
+    notes: "Aerobic fixed-film; needs power for dosing/recirculation."
+    source: {ref: eawag_compendium, page: 120}
+
+  - id: D.1
+    name: Fill and Cover / Arborloo
+    group: D
+    scale: [household]
+    inputs: [excreta, faeces, organics]
+    outputs: [biomass]
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: low, reuse_land: true}
+    siting: {pit_depth_m: 1, clearance_above_water_table_m: 2, setback_from_water_m: 30}
+    notes: "Shallow ~1 m pit; when full, cap with soil and plant a tree. Nutrient reuse in situ (the tree)."
+    source: {ref: eawag_compendium, page: 140}
+
+  - id: D.9
+    name: Fish Pond (effluent-fed aquaculture)
+    group: D
+    scale: [community]
+    inputs: [effluent]
+    outputs: [biomass]
+    reuse_products: [effluent]
+    requires: {water: false, power: false, skilled_labour: medium, reuse_land: true}
+    land_demand: high
+    siting: {}
+    notes: "Up to 10,000 kg/ha fish; effluent must meet aquaculture reuse guidance (WHO Vol 3). Land-intensive."
+    source: {ref: eawag_compendium, page: 156}
+
+  # ── Remaining Compendium technologies (completes the 57; semi-central T.3/T.4/T.17
+  #    are the same technologies as S.10/S.11/S.12 already in the catalog) ──
+  - id: U.3
+    name: Urinal
+    group: U
+    scale: [household, small_community, community]
+    inputs: [urine]
+    outputs: [urine]
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: low}
+    siting: {}
+    notes: "Urine-only interface (waterless favoured); feeds urine storage/reuse."
+    source: {ref: eawag_compendium, page: 48}
+  - id: U.5
+    name: Cistern Flush Toilet
+    group: U
+    scale: [household]
+    inputs: [faeces, urine, flushwater]
+    outputs: [blackwater]
+    reuse_products: []
+    requires: {water: true, power: false, skilled_labour: low}
+    siting: {}
+    notes: "6–9 L/flush (modern); needs a reliable piped water supply."
+    source: {ref: eawag_compendium, page: 52}
+  - id: U.6
+    name: Urine-Diverting Flush Toilet (UDFT)
+    group: U
+    scale: [household]
+    inputs: [faeces, urine, flushwater]
+    outputs: [brownwater, urine]
+    reuse_products: []
+    requires: {water: true, power: false, skilled_labour: medium}
+    siting: {}
+    notes: "Dual plumbing separates urine from flushed faeces (brownwater); needs water + careful plumbing."
+    source: {ref: eawag_compendium, page: 54}
+  - id: S.6
+    name: Twin Pits for Pour Flush
+    group: S
+    scale: [household]
+    inputs: [blackwater]
+    outputs: [pit_humus]
+    reuse_products: [pit_humus]
+    requires: {water: true, power: false, skilled_labour: low}
+    siting: {pit_depth_m: 2, clearance_above_water_table_m: 2, setback_from_water_m: 30}
+    notes: "Alternating pits; ~2 yr degradation → pit humus. Needs pour-flush water."
+    source: {ref: eawag_compendium, page: 68}
+  - id: C.1
+    name: Jerrycan / Tank (urine conveyance to offsite)
+    group: C
+    scale: [household, small_community]
+    inputs: [urine, stored_urine]
+    outputs: []
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: low, offsite_service: true}
+    siting: {}
+    notes: "Manual container haulage of (stored) urine to an offsite reuse point."
+    source: {ref: eawag_compendium, page: 84}
+  - id: C.5
+    name: Solids-Free Sewer (to offsite treatment)
+    group: C
+    scale: [small_community, community]
+    inputs: [effluent]
+    outputs: []
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: medium, offsite_service: true}
+    siting: {}
+    notes: "Small-bore sewer for settled effluent; needs downstream offsite treatment."
+    source: {ref: eawag_compendium, page: 92}
+  - id: C.7
+    name: Transfer Station (sludge, to offsite)
+    group: C
+    scale: [small_community, community]
+    inputs: [sludge]
+    outputs: []
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: low, offsite_service: true}
+    siting: {}
+    notes: "Intermediate discharge point for emptying vehicles; needs an offsite treatment chain."
+    source: {ref: eawag_compendium, page: 96}
+  - id: PRE
+    name: Pre-Treatment (grease trap / screen / grit)
+    group: T
+    scale: [small_community, community]
+    inputs: [blackwater, brownwater, greywater, sludge]
+    outputs: [blackwater, brownwater, greywater, sludge]   # pass-through (protects downstream); not a transform step
+    reuse_products: []
+    requires: {water: true, power: false, skilled_labour: low}
+    siting: {}
+    notes: "Removes FOG/grit/screenings ahead of treatment. A protective pass-through, not a product transform."
+    source: {ref: eawag_compendium, page: 100}
+  - id: T.6
+    name: Aerated Pond
+    group: T
+    scale: [community]
+    inputs: [effluent, blackwater, brownwater, greywater]
+    outputs: [effluent, sludge]
+    reuse_products: [effluent, sludge]
+    requires: {water: true, power: true, skilled_labour: medium}
+    siting: {}
+    notes: "Mechanical aeration; needs power. Detention 3–20 d; then settling."
+    source: {ref: eawag_compendium, page: 112}
+  - id: T.7
+    name: Free-Water Surface Constructed Wetland
+    group: T
+    scale: [small_community, community]
+    inputs: [effluent, stormwater]
+    outputs: [effluent, biomass]
+    reuse_products: [effluent]
+    requires: {water: false, power: false, skilled_labour: low}
+    land_demand: high
+    siting: {}
+    notes: "Polishing wetland; high SS removal, moderate pathogen/nutrient. Land-intensive."
+    source: {ref: eawag_compendium, page: 114}
+  - id: T.13
+    name: Sedimentation / Thickening Ponds
+    group: T
+    scale: [community]
+    inputs: [sludge]
+    outputs: [biosolids, effluent]
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: low}
+    siting: {}
+    notes: "Dewaters/thickens faecal sludge (load/rest cycles → ~14% TS)."
+    source: {ref: eawag_compendium, page: 126}
+  - id: T.15
+    name: Planted Drying Beds
+    group: T
+    scale: [small_community, community]
+    inputs: [sludge]
+    outputs: [biosolids, effluent, biomass]
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: low}
+    land_demand: high
+    siting: {}
+    notes: "Reed-bed sludge dewatering; removed every 3–5 yr; land-intensive but low-energy."
+    source: {ref: eawag_compendium, page: 130}
+  - id: POST
+    name: Tertiary Filtration & Disinfection
+    group: T
+    scale: [community]
+    inputs: [effluent]
+    outputs: [effluent]                                    # polishing pass-through
+    reuse_products: [effluent]
+    requires: {water: false, power: true, skilled_labour: high}
+    siting: {}
+    notes: "Depth/ultrafiltration + chlorine/UV/ozone to reach high reuse quality. Power + skill intensive."
+    source: {ref: eawag_compendium, page: 136}
+  - id: D.10
+    name: Floating Plant Pond (water hyacinth)
+    group: D
+    scale: [community]
+    inputs: [effluent]
+    outputs: [biomass]
+    reuse_products: [effluent]
+    requires: {water: false, power: false, skilled_labour: medium, reuse_land: true}
+    land_demand: high
+    siting: {}
+    notes: "High BOD/SS removal, LOW pathogen removal; harvested biomass. Land-intensive."
+    source: {ref: eawag_compendium, page: 158}
+  - id: D.11
+    name: Water Disposal / Groundwater Recharge
+    group: D
+    scale: [small_community, community]
+    inputs: [effluent, stormwater]
+    outputs: []
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: low, permeable_soil: true}
+    siting: {}
+    notes: "Discharge/recharge of treated effluent; disposal endpoint. Needs permeable ground + monitoring."
+    source: {ref: eawag_compendium, page: 160}
+
+  - id: T.14
+    name: Unplanted Drying Beds
+    group: T
+    scale: [small_community, community]
+    inputs: [sludge]
+    outputs: [biosolids, effluent]
+    reuse_products: []
+    requires: {water: false, power: false, skilled_labour: low}
+    siting: {}
+    notes: "Dewaters faecal sludge (50–80% drains/evaporates); dried biosolids still need pathogen check."
+    source: {ref: eawag_compendium, page: 128}
+
+  - id: T.16
+    name: Co-Composting
+    group: T
+    scale: [community]
+    inputs: [sludge, organics]
+    outputs: [compost]
+    reuse_products: [compost]
+    requires: {water: false, power: false, skilled_labour: medium}
+    siting: {}
+    notes: "Sludge:organics 1:2–1:3; ≥55–60 °C; achieves <1 viable helminth egg/g TS (see composting_thermophilic)."
+    source: {ref: eawag_compendium, page: 132}

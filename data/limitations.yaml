@@ -1,0 +1,89 @@
+# OpenWASH — known limitations, contested values, and scope gaps
+#
+# First-class record of what the adversarial verification pass surfaced
+# (research/reading/ADVERSARIAL.md). Types:
+#   contested       — a value in the substrate is challenged by newer evidence
+#   scope_gap       — a real reuse-safety concern the substrate does not model
+#   verifiability   — the value holds but its measurement/enforcement is limited
+#   currency        — the value is sound but a newer synthesized source exists
+#
+# The point: a health-safety substrate should carry its own known weaknesses
+# explicitly, not wait to be caught.
+
+limitations:
+
+  - id: thermal_conservative_mesophilic
+    type: contested
+    affects: "dieoff_kinetics thermal_model (>=50 C floor; EPA 503)"
+    finding: >
+      The >=50 C floor and the implicit 'thermal cannot inactivate Ascaris below
+      45 C' are challenged: mesophilic (<45 C) treatment DOES inactivate Ascaris
+      given time, and current time-temperature rules are 'too conservative' and
+      may exclude simple effective designs. A newer meta-analytic time-temperature
+      model (updated 'safety zones' for 4 pathogen groups) is available.
+    disposition: >
+      PARTLY RESOLVED. Sought the mesophilic curve to swap in; the evidence does not
+      robustly support one (Espinosa 2020 had few qualifying helminth studies; onsite
+      meta-analyses find temperature only weakly predictive of decay below ~50 C). So
+      the engine now (a) keeps EPA-503 as the conservative >=50 C screen, and (b) for
+      40-50 C gives a sourced ADVISORY (inactivation achievable given extended time per
+      Harroff 2019 / Naidoo 2020) instead of a hard reject OR a fabricated number.
+      Below 40 C -> ambient storage / ammonia regimes. No mesophilic rate invented.
+    sources: [{ref: harroff2019}, {ref: naidoo2020}, {ref: espinosa2020}]
+
+  - id: dieoff_constants_currency
+    type: currency
+    affects: "dieoff_kinetics Ascaris (WHO 2006 Table 3.5 T90=125d)"
+    finding: >
+      The binding-pathogen constant was WHO 2006 (Ascaris T90=125d, k=0.008/day).
+      The 2023 pooled onsite-sanitation meta-analysis (N=56 Ascaris studies) finds
+      GREATER persistence: median k=0.0042 log10/day (T90≈238d), T99=429d — so the
+      WHO single value was optimistic (too fast) for a safety screen.
+    disposition: >
+      RESOLVED for the binding pathogen. The die-off engine now uses the meta-analytic
+      Ascaris k (0.0042/day — conservative + current) for the ambient screen; the meta
+      T99=429d also corroborates WHO's conservative categorical >1yr rule (which the
+      verdict logic already sides with). WHO T90=125d kept as the documented alternative.
+      (Non-binding organisms still use WHO T90; refreshing those is a lower priority.)
+    sources: [{ref: musaazi2023}, {ref: muoghalu2026}]
+
+  - id: amr_out_of_scope
+    type: scope_gap
+    affects: "whole safety layer — antibiotic resistance genes not modelled"
+    finding: >
+      The safety layer covers helminth/bacteria/virus but not antibiotic resistance
+      genes (ARGs), which are a core reservoir in every WWTP (20 core ARGs found in
+      all plants sampled globally), survive and rebound through composting/digestion,
+      and transfer from reused sludge into crop tissue (ARGs found in tomato xylem).
+    disposition: "Explicitly out of scope for v0.1; a genuine gap for a reuse-safety dataset."
+    sources: [{ref: zhu2025}]
+
+  - id: micropollutants_out_of_scope
+    type: scope_gap
+    affects: "urine/sludge reuse safety — pharmaceuticals/micropollutants not modelled"
+    finding: >
+      Urine storage (and treatment generally) sanitizes pathogens but is insufficient
+      to remove anthropogenic micropollutants (pharmaceuticals) that carry into reuse.
+    disposition: "Out of scope for v0.1; flagged for the reuse-safety roadmap."
+    sources: [{ref: monetti2022}]
+
+  - id: rotavirus_index_assumption
+    type: contested
+    affects: "reuse_safety logred_* (6/7-log targets)"
+    finding: >
+      The 6/7-log unrestricted-irrigation targets are ROTAVIRUS-indexed (WHO 2006).
+      Newer QMRA sometimes indexes on norovirus (lower infectious dose, higher
+      persistence), which can shift required reductions. Targets are scenario-specific
+      (captured), but the index-organism choice is an embedded assumption.
+    disposition: "Documented assumption; norovirus-indexed targets may differ."
+    sources: [{ref: who2006_vol2}]
+
+  - id: helminth_assay_verifiability
+    type: verifiability
+    affects: "reuse_safety verify_* (helminth egg thresholds)"
+    finding: >
+      The <=1 egg/g value holds, but its ENFORCEMENT depends on egg-recovery and
+      viability assays with variable/incomplete recovery, so measured compliance can
+      understate the true viable-egg load. The threshold is only as good as the assay.
+    disposition: "Caveat on every helminth verification threshold."
+    sources: [{ref: ravindran2019}]

@@ -1,0 +1,7 @@
+# OpenWASH core — engine + tests. Minimal on purpose.
+pyyaml>=6.0
+pytest>=7.0
+
+# The research/ techno-economic models also run on just pyyaml (stdlib otherwise).
+# The OCR/browser tooling used to build research/datasets/ lives in research/.venv and
+# is NOT required to run the engine, the guardrail, or the tests.

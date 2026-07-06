@@ -1,0 +1,54 @@
+"""The system chainer — completeness, constraint propagation, ranking, regressions."""
+import systems
+
+DATA = systems.sel.load()
+BYID = {t["id"]: t for t in DATA["technologies"]}
+PRESETS = systems.sel.PRESETS
+
+def test_flood_plain_uddt_completes_without_any_deep_pit():
+    syslist = systems.enumerate_systems(DATA, PRESETS["flood_plain"], "U.2")
+    assert syslist, "UDDT should complete on a flood plain"
+    for s in syslist:
+        assert "S.2" not in s and "S.3" not in s  # water table disqualifies deep pits end-to-end
+
+def test_arborloo_is_reuse_complete_score_one():
+    # regression: in-situ biomass (a tree) counts as reuse, not disposal
+    syslist = systems.enumerate_systems(DATA, PRESETS["rural_ample_land"], "U.1")
+    arbor = [s for s in syslist if set(s) == {"U.1", "D.1"}]
+    assert arbor, "U.1 → Arborloo should be a valid system"
+    assert systems.score(arbor[0], BYID) == 1
+
+def test_reuse_scores_better_than_disposal():
+    reuse = systems.score(["U.1", "S.5", "D.4"], BYID)     # → compost application
+    disposal = systems.score(["U.1", "S.2", "D.12"], BYID)  # → landfill
+    assert reuse < disposal
+
+def test_offsite_service_unlocks_conveyance():
+    with_svc = systems.enumerate_systems(DATA, PRESETS["dense_urban"], "U.4")
+    assert any(any(t.startswith("C.") for t in s) for s in with_svc)
+    no_svc = dict(PRESETS["dense_urban"]); no_svc["offsite_service"] = False
+    without = systems.enumerate_systems(DATA, no_svc, "U.4")
+    assert without, "must still complete via onsite disposal"
+    assert all(not any(t.startswith("C.") for t in s) for s in without)
+
+def test_every_enumerated_system_is_product_complete():
+    # a returned system's non-terminal outputs must each be consumed within the system
+    site = PRESETS["rural_ample_land"]
+    syslist = systems.enumerate_systems(DATA, site, "U.1")[:50]
+    for s in syslist:
+        consumed = set()
+        for tid in s:
+            consumed |= set(BYID[tid].get("inputs", []))
+        for tid in s:
+            t = BYID[tid]
+            if t["group"] == "D" or t.get("outputs") in ([], None):
+                continue
+            for prod in t.get("outputs", []):
+                if prod == "biomass":
+                    continue
+                assert prod in consumed, f"system {s}: product {prod} from {tid} unresolved"
+
+def test_faeces_root_rule_excludes_urinal():
+    FAECES = {"excreta", "faeces", "blackwater", "brownwater"}
+    assert not (FAECES & set(BYID["U.3"]["outputs"]))   # urinal is urine-only → not a system root
+    assert FAECES & set(BYID["U.2"]["outputs"])          # UDDT manages faeces → valid root

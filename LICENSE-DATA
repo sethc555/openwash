@@ -1,0 +1,40 @@
+OpenWASH curated dataset & documentation — license
+===================================================
+
+SPDX-License-Identifier: CC-BY-4.0
+
+The OpenWASH curated dataset (data/*.yaml) and documentation (README.md,
+data/README.md, LICENSING.md, and research/reading/*.md) are licensed under the
+
+    Creative Commons Attribution 4.0 International License (CC BY 4.0)
+
+The authoritative, legally binding text of this license is published at:
+
+    https://creativecommons.org/licenses/by/4.0/legalcode
+    (human-readable summary: https://creativecommons.org/licenses/by/4.0/)
+
+This grant applies to OpenWASH's own contribution — the SELECTION, ARRANGEMENT,
+schema, corroboration logic, lineage analysis, and annotations. It expressly
+extends to any applicable sui generis database rights.
+
+WHAT THIS COVERS — AND WHAT IT DOES NOT
+---------------------------------------
+- The safety NUMBERS themselves (thresholds, die-off constants, reduction targets)
+  are FACTS extracted from and cited to their original sources (see data/sources.yaml).
+  Facts are not owned by OpenWASH and are not the subject of this license.
+- Source documents (WHO, EAWAG/Sandec, Sphere, US EPA, peer-reviewed literature)
+  remain under their OWN terms and are NOT redistributed in this repository. See
+  data/sources.yaml for each upstream's terms and NOTICE for the provenance statement.
+- Code (engine/, tests/, research/*.py) is licensed separately under Apache-2.0 (LICENSE),
+  not this file.
+
+HOW TO ATTRIBUTE
+----------------
+Under CC BY 4.0 you may share and adapt this material, including commercially, provided
+you give appropriate credit, link to the license, and indicate if changes were made.
+Suggested attribution:
+
+    "OpenWASH reuse-safety substrate (CC BY 4.0), citing its underlying sources."
+
+Do NOT imply endorsement by OpenWASH or by any cited organization (WHO, EAWAG, Sphere,
+US EPA, or others). See NOTICE.

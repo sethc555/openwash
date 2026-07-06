@@ -1,0 +1,143 @@
+# OpenWASH — pathogen die-off kinetics (constraint-engine seed data)
+#
+# All values sourced from WHO 2006 Vol 4: Table 3.5 (T90 at reference temp) and
+# Table 3.8 (decay rate k in log10/day at specific temperatures). NO invented
+# numbers — where the corpus lacks a temperature model, the engine says so.
+#
+# Model used by engine/dieoff.py: first-order (log-linear) inactivation
+#   log_reduction(t) = k(T) * t   [log10 units]   with k = 1/T90 (decimal reduction rate).
+# This is an OPTIMISTIC screen: real die-off (esp. Ascaris) has shoulders/tails
+# and is non-monotonic in the field (see storage_passive_ambient field caveat).
+# So the engine rules OUT insufficient designs (necessary condition); it does
+# NOT certify safety (not a sufficient condition).
+
+meta:
+  model: first_order_loglinear
+  binding_organism: ascaris
+  ref: {ref: who2006_vol4, pages: [59, 64], locator: "Tables 3.5 & 3.8"}
+
+organisms:
+
+  ascaris:
+    name: "Ascaris (roundworm egg) — the binding constraint"
+    binding: true
+    t90_days:                          # Table 3.5, reference temp ~20–30 °C
+      faeces: {mean: 125, sd: 30, source: {ref: who2006_vol4, page: 59, locator: "Table 3.5"}}
+      soil:   {mean: 625, sd: 150, source: {ref: who2006_vol4, page: 59, locator: "Table 3.5"}}
+    ref_temp_C: [20, 30]
+    temp_model: none                   # no sourced temperature-dependent rate for Ascaris
+    # 2023 pooled onsite-sanitation meta-analysis (N=56 Ascaris studies) — the current
+    # synthesis. Ascaris is MORE persistent than the single WHO 2006 Table 3.5 value:
+    #   meta median k = 0.0042 log10/day (T90≈238d) vs WHO T90=125d (k=0.008). The engine
+    #   uses the meta k for the ambient screen (conservative + current); the meta T99=429d
+    #   also corroborates the WHO categorical >1yr rule (Table 4.5). Temp not predictive <50C.
+    meta_analysis:
+      k_log10_per_day: 0.0042          # median; 5th–95th 8e-6 to 0.52
+      t99_days: 429                    # median; 95% 9.7 to >658
+      n_studies: 56
+      temp_independent_below_C: 50
+      source: {ref: musaazi2023}
+    storage_rule:                      # categorical WHO fallback (Table 4.5) — use when temp_model is none
+      - {temp_C: [2, 20], time_days: [548, 730], effect: "near-complete; some soil ova persist", source: {ref: who2006_vol4, page: 90, locator: "Table 4.5"}}
+      - {temp_C: [20, 35], time_days: [365, 400], effect: "10–30% survive >=4 mo; near-complete by 1 yr", source: {ref: who2006_vol4, page: 90, locator: "Table 4.5"}}
+    # Ammonia-enhanced inactivation (ash/lime/urea amendment, or intrinsic NH3 from
+    # urea hydrolysis in urine/faeces). Inactivation rate ∝ uncharged NH3 activity
+    # (Pecson 2007), strongly temperature-dependent (Nordin 2009).
+    ammonia_model:
+      driver: uncharged_NH3
+      # NH3 fraction of total ammoniacal-N: f = 1/(1+10^(pKa-pH)); pKa temp-dependent (Emerson/Nordin):
+      pKa_formula: "2729.92/T_kelvin + 0.09018"
+      threshold_mM: 20               # below ~20 mM NH3(aq) the ammonia effect is negligible
+      # first-order rate k (log10/day) = coeff · NH3_mM · Q10^((T−24)/10), CALIBRATED to
+      # reproduce the four Nordin-2009 t99 anchor points below (coeff fit, not invented):
+      k_coeff_log10_per_day_per_mM: 2.6e-4    # at 24 °C reference
+      Q10: 5.0                       # "~5-fold faster per +10 °C" (24→34 °C), Nordin 2009
+      source: {ref: nordin2009, locator: "results/Fig; mechanism Pecson 2007"}
+      anchors_t99_days:              # sourced validation points (t99 = 2-log inactivation time)
+        - {temp_C: 34, nh3_mM: 250, t99_days: 5.9,  lab: nordin,    source: {ref: nordin2009}}
+        - {temp_C: 24, nh3_mM: 130, t99_days: 59,   lab: nordin,    source: {ref: nordin2009}}
+        - {temp_C: 14, nh3_mM: 94,  t99_days: 400,  lab: nordin,    note: ">1 year", source: {ref: nordin2009}}
+        - {temp_C: 4,  nh3_mM: 94,  t99_days: 2000, lab: nordin,    note: "negligible over 6 mo", source: {ref: nordin2009}}
+        - {temp_C: 24, nh3_mM: 230, t99_days: 33,   lab: fidjeland, note: "cross-check (95% CI)", source: {ref: fidjeland2015}}
+        - {temp_C: 34, nh3_mM: 440, t99_days: 6.4,  lab: fidjeland, note: "cross-check (95% CI)", source: {ref: fidjeland2015}}
+      # Non-log-linear note: a LAG phase (minimal viability loss) precedes exponential
+      # inactivation (Nordin 2009, Fidjeland 2015). Fidjeland TESTED a smooth-shoulder
+      # (Weibull-type) model and REJECTED it — it over-predicted total times ~2x — and
+      # preferred log-linear fitted to the conservative (95% CI) endpoints. So the engine
+      # does NOT use a smooth shoulder; instead it treats t99 as the robustness threshold:
+      # a "pass" achieved in << t99 relies on the optimistic early/lag phase and is flagged.
+      lag_note: "log-linear over-credits sub-t99 exposures (lag phase); require days >= t99 for a robust pass."
+    # Thermal-treatment regime (composting / pasteurisation, T >= 50 °C). Uses the US EPA
+    # 40 CFR 503 Class-A time–temperature requirement (covers viable helminth ova):
+    #   required_days D = 131,700,000 / 10^(0.1400·T)   [T in °C, >=7% solids]
+    # A design is safe if actual hold time >= D at the sustained temperature.
+    thermal_model:
+      regime: ">=50 C composting/pasteurisation (whole mass, >=7% solids)"
+      required_days_formula: "1.317e8 / 10^(0.1400*T_C)"
+      min_temp_C: 50
+      contested: limitations/thermal_conservative_mesophilic   # Harroff 2019: mesophilic (<45C) works given time; the >=50C floor is deliberately conservative for a screen but excludes valid designs
+      mesophilic_advisory:
+        temp_range_C: [40, 50]
+        finding: >
+          Ascaris inactivation IS achievable at mesophilic temperatures given
+          extended time (Harroff 2019; Naidoo 2020, 40-55 C in water and UDDT/VIP
+          sludge), so the >=50 C floor is a conservative SCREEN boundary, not a
+          biological limit. BUT a robust quantitative time-temperature curve does
+          NOT exist in this band: Espinosa 2020 had few qualifying helminth
+          studies, and onsite meta-analyses find temperature only weakly predictive
+          of decay below ~50 C. So the engine ADVISES here — it neither rejects
+          outright nor invents a pass/fail number.
+        sources: [{ref: harroff2019}, {ref: naidoo2020}, {ref: espinosa2020}]
+      solids_lt_7pct_constant: 5.007e7   # 40 CFR 503.32(a)(4) alt for <7% solids / small particles
+      source: {ref: epa503, locator: "40 CFR 503.32(a)(3)"}
+      cross_check:                        # sourced points this regulatory curve is consistent with
+        - {temp_C: 50, epa_days: 13.2, who: ">1 week", source: {ref: who2006_vol4, page: 89}}
+        - {temp_C: 57, epa_days: 1.1,  who: "55–60 °C → 1–2 d (Haug 1993)", source: {ref: who2006_vol4, page: 84}}
+
+  salmonella:
+    name: "Salmonella (bacterial pathogen)"
+    binding: false
+    t90_days:
+      faeces: {mean: 30, sd: 8, source: {ref: who2006_vol4, page: 59, locator: "Table 3.5"}}
+      soil:   {mean: 35, sd: 6, source: {ref: who2006_vol4, page: 59, locator: "Table 3.5"}}
+    ref_temp_C: [20, 30]
+    temp_model: interpolate            # Table 3.8 gives k at two temps
+    decay_rates:                       # k in log10/day
+      - {temp_C: 4,  k: 0.048, matrix: greywater_sediment, source: {ref: who2006_vol4, page: 64, locator: "Table 3.8"}}
+      - {temp_C: 20, k: 0.12,  matrix: greywater_sediment, source: {ref: who2006_vol4, page: 64, locator: "Table 3.8"}}
+    field_caveat: "Salmonella can REGROW during storage (Kumwenda 2019: 71->456 CFU/g). First-order decay does not model regrowth."
+
+  campylobacter:
+    name: "Campylobacter (bacterial pathogen)"
+    binding: false
+    t90_days:
+      faeces: {mean: null, source: {ref: who2006_vol4, page: 64, locator: "derived from Table 3.8"}}
+    ref_temp_C: [5, 25]
+    temp_model: interpolate
+    decay_rates:
+      - {temp_C: 5,  k: 0.02, matrix: river_water_sediment, source: {ref: who2006_vol4, page: 64, locator: "Table 3.8"}}
+      - {temp_C: 15, k: 0.11, matrix: river_water_sediment, source: {ref: who2006_vol4, page: 64, locator: "Table 3.8"}}
+      - {temp_C: 25, k: 1.30, matrix: river_water_sediment, source: {ref: who2006_vol4, page: 64, locator: "Table 3.8"}}
+
+  rotavirus:
+    name: "Rotavirus (viral pathogen, QMRA index organism)"
+    binding: false
+    t90_days:
+      faeces: {mean: 60, sd: 16, source: {ref: who2006_vol4, page: 59, locator: "Table 3.5"}}
+      soil:   {mean: 30, sd: 8, source: {ref: who2006_vol4, page: 59, locator: "Table 3.5"}}
+    ref_temp_C: [20, 30]
+    temp_model: single_point
+    decay_rates:
+      - {temp_C: 15, k: 0.016, matrix: liquid_waste, source: {ref: who2006_vol4, page: 64, locator: "Table 3.8"}}
+
+  cryptosporidium:
+    name: "Cryptosporidium (protozoan, chlorine-resistant)"
+    binding: false
+    t90_days:
+      faeces: {mean: 70, sd: 20, source: {ref: who2006_vol4, page: 59, locator: "Table 3.5"}}
+      soil:   {mean: 495, sd: 182, source: {ref: who2006_vol4, page: 59, locator: "Table 3.5"}}
+    ref_temp_C: [20, 30]
+    temp_model: interpolate
+    decay_rates:
+      - {temp_C: 5,  k: 0.006, matrix: river_water, source: {ref: who2006_vol4, page: 64, locator: "Table 3.8"}}
+      - {temp_C: 15, k: 0.011, matrix: river_water, source: {ref: who2006_vol4, page: 64, locator: "Table 3.8"}}

@@ -1,0 +1,195 @@
+# OpenWASH — source registry
+# Every value in the dataset cites one or more of these by `ref:`.
+# `lineage` is the key field for honest corroboration: two sources with the
+# SAME lineage are not independent (one restates/derives the other), so they
+# do NOT compound into a higher trust tier. The engine counts distinct
+# lineages, not distinct documents.
+
+sources:
+  who2006_vol4:
+    title: "Guidelines for the Safe Use of Wastewater, Excreta and Greywater — Vol 4: Excreta and greywater use in agriculture"
+    org: WHO
+    year: 2006
+    lineage: who_2006_reuse        # companion volume — shares derivation with Vol 2
+    license: "WHO © — cite & extract, do not rehost"
+    local: research/datasets/who_guidelines/WHO2006_safeuse_Vol4_EXCRETA_greywater_agriculture.pdf
+
+  who2006_vol2:
+    title: "Guidelines for the Safe Use of Wastewater, Excreta and Greywater — Vol 2: Wastewater use in agriculture"
+    org: WHO
+    year: 2006
+    lineage: who_2006_reuse        # same 2006 project + QMRA basis as Vol 4
+    license: "WHO © — cite & extract, do not rehost"
+    local: research/datasets/who_guidelines/WHO2006_safeuse_Vol2_wastewater_agriculture.pdf
+
+  who_ssp:
+    title: "Sanitation Safety Planning: manual for safe use and disposal of wastewater, greywater and excreta"
+    org: WHO
+    year: 2015
+    lineage: who_2006_reuse        # SSP reproduces the 2006 reduction targets verbatim — NOT independent
+    restates: who_2006_reuse
+    license: "WHO © — cite & extract, do not rehost"
+    local: research/datasets/who_guidelines/WHO_Sanitation_Safety_Planning_manual.pdf
+
+  sphere2018:
+    title: "The Sphere Handbook 2018 — WASH minimum standards"
+    org: Sphere Association
+    year: 2018
+    lineage: sphere
+    license: "© Sphere — free redistribution unmodified w/ attribution"
+    local: research/datasets/sphere/Sphere_Handbook_2018_EN.pdf
+
+  eawag_compendium:
+    title: "Compendium of Sanitation Systems and Technologies, 2nd ed."
+    org: EAWAG/Sandec (Tilley et al.)
+    year: 2014
+    lineage: eawag                 # independent for engineering/siting figures; CITES WHO for pathogen storage (mark per-claim)
+    license: "Open access w/ attribution"
+    local: research/datasets/eawag_compendium/Compendium_Sanitation_Systems_2nd_Ed.pdf
+
+  cawst_bsf:
+    title: "Biosand Filter for Technicians — Construction Manual"
+    org: CAWST
+    year: 2012
+    lineage: cawst
+    license: "CAWST — non-commercial WASH use"
+    local: research/datasets/cawst/CAWST_BSF_for_Technicians_Construction_Manual_2012_en.pdf
+
+  manga2020:
+    title: "Fate of faecal pathogen indicators during faecal sludge composting with different bulking agents in tropical climate"
+    org: "Manga et al., Int. J. Hyg. Environ. Health"
+    year: 2020
+    lineage: manga_field           # independent field/experimental evidence
+    license: "peer-reviewed (OA)"
+    doi: 10.1016/j.ijheh.2020.113670
+
+  manga2023:
+    title: "Inactivation of faecal pathogens during faecal sludge composting: a systematic review"
+    org: "Manga, Muoghalu & Acheng, Environ. Technol. Reviews"
+    year: 2023
+    lineage: manga_field
+    license: "peer-reviewed"
+    doi: 10.1080/21622515.2023.2182719
+
+  kumwenda2019:
+    title: "Inactivation of pathogens in ecological sanitation latrines in Malawi: an observational follow-up study"
+    org: "Kumwenda et al., Malawi Med. J."
+    year: 2019
+    lineage: kumwenda_field        # independent deployed-outcome field study
+    license: "peer-reviewed (OA)"
+    doi: 10.4314/mmj.v31i1.3
+
+  nordin2009:
+    title: "Inactivation of Ascaris eggs in source-separated urine and feces by ammonia at ambient temperatures"
+    org: "Nordin, Nyberg & Vinnerås, Appl. Environ. Microbiol."
+    year: 2009
+    lineage: ammonia_kinetics      # independent lab kinetics (OA, PMC2632132)
+    license: "peer-reviewed (OA)"
+    doi: 10.1128/AEM.01250-08
+
+  pecson2007:
+    title: "The effects of temperature, pH, and ammonia concentration on the inactivation of Ascaris eggs in sewage sludge"
+    org: "Pecson, Barrios, Jiménez & Nelson, Water Research"
+    year: 2007
+    lineage: pecson_ascaris        # independent group/data — corroborates NH3-driven MECHANISM
+    license: "peer-reviewed"
+    doi: 10.1016/j.watres.2007.03.040
+
+  fidjeland2015:
+    title: "Modeling the inactivation of Ascaris eggs as a function of ammonia concentration and temperature"
+    org: "Fidjeland, Magri, Jönsson, Albihn & Vinnerås, Water Research 83:153–160"
+    year: 2015
+    lineage: ammonia_kinetics      # SAME lineage as Nordin — reanalyzes previously published data
+    reanalyzes: nordin2009
+    note: "Tested & REJECTED a smooth-shoulder model (over-predicted times ~2x); preferred log-linear split at the lag breakpoint. Its independent t99 values cross-check the calibrated model."
+    license: "peer-reviewed"
+    doi: 10.1016/j.watres.2015.06.030
+
+  epa503:
+    title: "40 CFR Part 503 — Standards for the Use or Disposal of Sewage Sludge (time–temperature requirement for Class A pathogen reduction)"
+    org: "US EPA"
+    year: 1993
+    lineage: epa_regulatory        # independent regulatory relationship for thermal pathogen (incl. helminth) reduction
+    license: "US federal regulation (public domain)"
+    ref: "40 CFR 503.32(a)(3)"
+
+  munch2007:
+    title: "Methodology to compare costs of sanitation options for low-income peri-urban areas in Lusaka, Zambia"
+    org: "Münch & Mayumbelo, Water SA 33(5)"
+    year: 2007
+    lineage: sanitation_cost       # cost anchors are context-specific, not universal (see data/costs.yaml)
+    license: "peer-reviewed (OA)"
+    doi: 10.4314/wsa.v33i5.184017
+
+  # ── sources surfaced by the adversarial pass (research/reading/ADVERSARIAL.md) ──
+  harroff2019:
+    title: "Current time-temperature relationships for thermal inactivation of Ascaris eggs at mesophilic temperatures are too conservative and may hamper development of simple, but effective sanitation"
+    org: "Harroff, Liotta, Bowman et al., Water Research X"
+    year: 2019
+    lineage: thermal_ascaris_challenge
+    license: "peer-reviewed (OA)"
+    doi: 10.1016/j.wroa.2019.100036
+  espinosa2020:
+    title: "Systematic review and meta-analysis of time-temperature pathogen inactivation"
+    org: "Espinosa, Sancho, Mendoza et al., Int. J. Hyg. Environ. Health"
+    year: 2020
+    lineage: thermal_meta
+    note: "Builds time-temperature 'safety zones' for 4 pathogen groups, but had FEW qualifying helminth studies; below ~50 C temperature is weakly predictive of decay — so no robust mesophilic helminth curve to adopt."
+    license: "peer-reviewed (OA)"
+    doi: 10.1016/j.ijheh.2020.113595
+  naidoo2020:
+    title: "Inactivation of Ascaris for thermal treatment and drying applications in faecal sludge"
+    org: "Naidoo, Archer, Septien et al., J. Water Sanit. Hyg. Dev. 10(2)"
+    year: 2020
+    lineage: thermal_ascaris_challenge   # mesophilic Ascaris thermal data (40–55 C in water/sludge)
+    license: "peer-reviewed (OA)"
+    doi: 10.2166/washdev.2020.119
+  muoghalu2026:
+    title: "Enteric pathogen dynamics in onsite sanitation systems: a systematic review and meta-analysis on prevalence, concentration, inactivation, and Bayesian modeling"
+    org: "Muoghalu, Sprouse, Kaboggoza et al., Int. J. Hyg. Environ. Health"
+    year: 2026
+    lineage: onsite_dieoff_meta
+    license: "peer-reviewed"
+    doi: 10.1016/j.ijheh.2026.114828
+  musaazi2023:
+    title: "A systematic review and meta-analysis of pathogen reduction in onsite sanitation systems"
+    org: "Musaazi, McLoughlin, Murphy et al., Water Research X"
+    year: 2023
+    lineage: onsite_dieoff_meta        # OA; pooled decay constants used to refresh the Ascaris T90
+    license: "peer-reviewed (OA)"
+    doi: 10.1016/j.wroa.2023.100171
+  zhu2025:
+    title: "Global diversity and distribution of antibiotic resistance genes in human wastewater treatment systems"
+    org: "Zhu, Wu, Ning et al., Nature Communications"
+    year: 2025
+    lineage: amr
+    license: "peer-reviewed (OA)"
+    doi: 10.1038/s41467-025-59019-3
+  monetti2022:
+    title: "Urea hydrolysis and long-term storage of source-separated urine for reuse as fertiliser is insufficient for the removal of anthropogenic micropollutants"
+    org: "Monetti, Nieradzik, Freguia et al., Water Research"
+    year: 2022
+    lineage: micropollutants
+    license: "peer-reviewed"
+    doi: 10.1016/j.watres.2022.118891
+  li2024:
+    title: "Sewage sludge promotes the accumulation of antibiotic resistance genes in tomato xylem"
+    org: "Li, Li, Xu et al., Environmental Science & Technology"
+    year: 2024
+    lineage: amr
+    license: "peer-reviewed"
+    doi: 10.1021/acs.est.4c02497
+  atamaleki2019:
+    title: "The concentration of potentially toxic elements (PTEs) in onion and tomato irrigated by wastewater: a systematic review, meta-analysis and health risk assessment"
+    org: "Atamaleki, Yazdanbakhsh, Fakhri et al., Food Research International"
+    year: 2019
+    lineage: heavy_metals
+    license: "peer-reviewed"
+    doi: 10.1016/j.foodres.2019.108518
+  ravindran2019:
+    title: "A review on the current knowledge and prospects for improved detection methods for soil-transmitted helminth ova for safe reuse of wastewater"
+    org: "Ravindran, Soni & Ball, Water"
+    year: 2019
+    lineage: helminth_assay
+    license: "peer-reviewed (OA)"
+    doi: 10.3390/w11061212

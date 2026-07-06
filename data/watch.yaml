@@ -1,0 +1,60 @@
+# OpenWASH — reuse hazard "watch layer"
+#
+# Non-pathogen reuse hazards that the pathogen-focused safety table does NOT cover.
+# This is a FLAG layer, not a quantitative model: unlike pathogens (log-reduction
+# targets, ≤1 helminth egg), there is no accepted reduction target for these, so the
+# honest output is a sourced warning per reuse pathway — "the safety screen you just
+# passed says nothing about this."
+#
+# Surfaced by the adversarial pass (research/reading/ADVERSARIAL.md).
+
+meta:
+  kind: flag_layer
+  note: "passing the pathogen safety screen does NOT clear these; source control + monitoring, not a die-off time, is the lever"
+
+hazards:
+
+  - id: amr_args
+    name: "Antimicrobial resistance (antibiotic resistance genes / ARGs)"
+    applies_to_products: [sludge, biosolids, compost, pit_humus, effluent]
+    what: "Antibiotic resistance genes and resistant bacteria in excreta and sludge."
+    why_the_safety_table_misses_it: >
+      The safety table targets pathogen VIABILITY (log reduction, helminth-egg counts).
+      ARGs are genes that persist and transfer horizontally independently of pathogen
+      inactivation — and can even REBOUND during the cooling phase of composting — so a
+      system can meet the pathogen target and still carry a high resistance load.
+    evidence:
+      - {finding: "A core set of 20 ARGs was present in ALL wastewater treatment plants sampled across six continents", source: {ref: zhu2025}}
+      - {finding: "ARGs from sewage-sludge reuse accumulate in tomato XYLEM — i.e. they move into the crop, not just the soil", source: {ref: li2024}}
+    disposition: >
+      Out of scope for v0.1 (no accepted ARG reduction target exists). Flag on any
+      solids/effluent reuse. Thermophilic composting reduces ARGs but they can rebound;
+      source control (antibiotic stewardship upstream) is the primary lever.
+
+  - id: micropollutants
+    name: "Pharmaceuticals / anthropogenic micropollutants"
+    applies_to_products: [urine, stored_urine, effluent, sludge, biosolids]
+    what: "Drug residues and trace organic pollutants excreted in urine and faeces."
+    why_the_safety_table_misses_it: >
+      Storage and treatment sized to kill pathogens do not remove micropollutants;
+      the pathogen safety screen is silent on them.
+    evidence:
+      - {finding: "Urea hydrolysis + long-term urine storage sanitizes pathogens but is INSUFFICIENT to remove anthropogenic micropollutants", source: {ref: monetti2022}}
+    disposition: >
+      Out of scope for v0.1. Flag on urine/effluent/sludge reuse, especially where the
+      catchment includes hospitals/pharma. Removal needs dedicated treatment (activated
+      carbon, ozonation), not storage.
+
+  - id: heavy_metals
+    name: "Heavy metals / potentially toxic elements (PTEs)"
+    applies_to_products: [effluent, sludge, biosolids]
+    what: "Fe, Zn, Cu, Cr, Pb, Ni, Cd that accumulate in soil and edible crops under long-term wastewater/sludge reuse."
+    why_the_safety_table_misses_it: >
+      Not a pathogen; the safety table does not address them. Metals bioaccumulate and
+      are not removed by pathogen inactivation — the hazard is source- and time-dependent.
+    evidence:
+      - {finding: "Systematic review + meta-analysis of PTEs (Fe, Zn, Cu, Cr, Pb, Ni, Cd) in wastewater-irrigated onion and tomato, with a health-risk assessment", source: {ref: atamaleki2019}}
+    disposition: >
+      Out of scope for v0.1; most acute where industrial effluent mixes with sewage. Flag
+      on effluent/sludge reuse; the lever is source separation of industrial inputs +
+      periodic soil/crop metal monitoring, not treatment time.
