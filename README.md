@@ -53,6 +53,10 @@ The [`engine`](engine/openwash.py) enforces four things on real data
 4. **Contested values surfaced, never averaged** — Sphere (≥1.5 m) vs EAWAG (≥2 m)
    pit clearance above the water table, both kept, resolved by policy not by mean.
 
+The project turns these rules **on itself**: every place OpenWASH was wrong, caught it, and retracted
+— in its numbers, its model, and its code — is consolidated in [`AUDIT.md`](AUDIT.md) (the honesty
+ledger).
+
 It has also been **adversarially verified** ([`research/reading/ADVERSARIAL.md`](research/reading/ADVERSARIAL.md)):
 a 151-paper refutation scan tried to defeat every load-bearing value. The core safety numbers held
 (log-reduction targets, helminth threshold, Ascaris persistence, ammonia kinetics — three further
@@ -173,6 +177,7 @@ research/
              · ADVERSARIAL_ECON (the techno-economic study + the over-claims it caught)
 claims.yaml      10 machine-verifiable claims — each reproduces iff it holds
 attestation.json the re-runnable result of verifying them (10/10)
+AUDIT.md         the honesty ledger — every over-claim caught, retracted, and pinned
 ```
 
 > This is the open release: the sourced substrate, the engine, the guardrail, the tests,
