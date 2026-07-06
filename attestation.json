@@ -1,0 +1,112 @@
+{
+  "schema": "claimcheck/v0.1",
+  "manifest_sha256": "00bf55bd6fac5b241cd779aa0f4c0cb3b0bcffd180b093370f2a7381bd766b68",
+  "artifact": {
+    "title": "OpenWASH \u2014 an open, provenance-tagged reuse-safety substrate and guardrail for excreta reuse",
+    "author": "Seth Cope",
+    "orcid": "0009-0000-5520-915X",
+    "doi": "",
+    "repo": "https://github.com/sethc555/openwash",
+    "commit": "cc50b3d2ef2d4b495cc9fb4efc54fa526d4a311b",
+    "working_tree_dirty": false
+  },
+  "verifier": {
+    "name": "claimcheck",
+    "version": "0.1.0"
+  },
+  "verified_at": "2026-07-06T14:05:51.974284+00:00",
+  "host": {
+    "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "environment_hash": "sha256:dd1d901cf02a1ef5035ce2b1f20ea9543c2bb50c6c8e6717b37f252788f67a20",
+  "results": [
+    {
+      "id": "suite",
+      "status": "pass",
+      "exit_code": 0,
+      "duration_s": 0.7,
+      "detail": "",
+      "stdout_tail": "................................................................         [100%]\n64 passed in 0.48s"
+    },
+    {
+      "id": "no_naked_numbers",
+      "status": "pass",
+      "exit_code": 0,
+      "duration_s": 0.3,
+      "detail": "",
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.12s"
+    },
+    {
+      "id": "sources_resolve",
+      "status": "pass",
+      "exit_code": 0,
+      "duration_s": 0.3,
+      "detail": "",
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.13s"
+    },
+    {
+      "id": "overclaim_caught",
+      "status": "pass",
+      "exit_code": 0,
+      "duration_s": 0.2,
+      "detail": "",
+      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.06s"
+    },
+    {
+      "id": "target_vs_field",
+      "status": "pass",
+      "exit_code": 0,
+      "duration_s": 0.3,
+      "detail": "",
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.13s"
+    },
+    {
+      "id": "untreated_unsafe",
+      "status": "pass",
+      "exit_code": 0,
+      "duration_s": 0.2,
+      "detail": "",
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.03s"
+    },
+    {
+      "id": "malawi_field_contradiction",
+      "status": "pass",
+      "exit_code": 0,
+      "duration_s": 0.2,
+      "detail": "",
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.03s"
+    },
+    {
+      "id": "unknown_not_a_guess",
+      "status": "pass",
+      "exit_code": 0,
+      "duration_s": 0.2,
+      "detail": "",
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.03s"
+    },
+    {
+      "id": "verification_plan_tiers",
+      "status": "pass",
+      "exit_code": 0,
+      "duration_s": 0.2,
+      "detail": "",
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.03s"
+    },
+    {
+      "id": "dieoff_reproduces_anchors",
+      "status": "pass",
+      "exit_code": 0,
+      "duration_s": 0.2,
+      "detail": "",
+      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.03s"
+    }
+  ],
+  "summary": {
+    "passed": 10,
+    "total": 10,
+    "all_passed": true
+  },
+  "signature": null,
+  "note": "Unsigned MVP. Trust = re-runnability: run `claimcheck verify` yourself on a clean checkout to reproduce this result. Attests COMPUTATIONAL REPRODUCIBILITY only, not correctness of the underlying science."
+}
