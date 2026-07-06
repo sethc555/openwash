@@ -1,7 +1,8 @@
 # OpenWASH — licensing analysis & recommendation
 
-_Status: recommendation for approval. Not yet applied (no LICENSE files dropped). Get a real
-legal eyeball before a formal public launch — see Risks._
+_Status: **APPLIED.** `LICENSE` (Apache-2.0) + `LICENSE-DATA` (CC-BY-4.0) + `NOTICE` are in the
+repo. The EU database-right question is **resolved — LOW risk** (see Risks). This file records the
+decision, the rationale, and the honest residual caveats._
 
 ## TL;DR recommendation
 
