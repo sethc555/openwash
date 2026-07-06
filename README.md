@@ -171,12 +171,32 @@ tests/           64 pytest checks — data integrity, corroboration, all 3 die-o
 research/
   reading/   SYNTHESIS (the evidence trail) · ADVERSARIAL (151-paper refutation scan)
              · ADVERSARIAL_ECON (the techno-economic study + the over-claims it caught)
+claims.yaml      10 machine-verifiable claims — each reproduces iff it holds
+attestation.json the re-runnable result of verifying them (10/10)
 ```
 
 > This is the open release: the sourced substrate, the engine, the guardrail, the tests,
 > and the evidence/adversarial write-ups. The raw literature-scan dumps, the source-PDF
 > mirror, and the illustrative techno-economic model scripts live in the project's working
 > repository; every load-bearing conclusion from them is recorded in the reading/ docs above.
+
+## Reproducible claims
+
+The project applies its own honesty discipline to itself. Ten load-bearing claims — that the engine
+refuses naked numbers, that it caught a real over-claim, that it flags the Malawi field
+contradiction as UNSAFE, that it says *"not enough evidence"* instead of guessing, that the die-off
+model reproduces its published anchors — are declared in [`claims.yaml`](claims.yaml), each with a
+command that **exits 0 if and only if the claim holds**. [`attestation.json`](attestation.json)
+records the result (10/10). Trust is re-runnability, not our word — verify it yourself on a clean
+checkout:
+
+```
+pip install -r requirements.txt
+claimcheck verify claims.yaml          # or, without the tool: PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest tests/
+```
+
+This attests *computational reproducibility* — that the engine and dataset behave as described — not
+the correctness of the underlying WASH science, which lives in the cited sources.
 
 ## Next
 

@@ -1,0 +1,104 @@
+# claims.yaml — claimcheck manifest for OpenWASH.
+# Contract: every claim's `reproduce` command exits 0 IF AND ONLY IF the claim holds.
+# Trust = re-runnability. Anyone can `claimcheck verify claims.yaml` on a clean checkout and get
+# the same result. This attests COMPUTATIONAL REPRODUCIBILITY of the stated claims — that the
+# engine and dataset behave as described — NOT the correctness of the underlying WASH science
+# (that lives in the cited sources).
+schema: claimcheck/v0.1
+
+artifact:
+  title:  "OpenWASH — an open, provenance-tagged reuse-safety substrate and guardrail for excreta reuse"
+  author: "Seth Cope"
+  orcid:  "0009-0000-5520-915X"
+  doi:    ""                                   # filled once the Zenodo DOI is minted
+  repo:   "https://github.com/sethc555/openwash"
+
+environment:
+  runner: "python3"
+  workdir: "."                                 # reproduce commands run from the repo root
+  setup:   "pip install -r requirements.txt"   # pyyaml + pytest
+  memory_cap_mb: 2048
+  timeout_s: 120
+
+# Each reproduce command disables pytest plugin autoload so the result is hermetic on any host
+# (a stray third-party pytest plugin should never change whether a safety claim reproduces).
+claims:
+  - id: suite
+    statement: >-
+      The full public test suite — 64 tests over the dataset, corroboration engine, die-off model,
+      technology selector, and safety guardrail — reproduces green.
+    reproduce: "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q"
+    expect:
+      exit_code: 0
+      stdout_contains: "64 passed"
+
+  - id: no_naked_numbers
+    statement: >-
+      No naked numbers: every quantitative safety value in the dataset carries a source citation —
+      the engine refuses to hold a number it cannot attribute.
+    reproduce: "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q tests/test_data.py::test_no_naked_numbers"
+    expect: { exit_code: 0 }
+
+  - id: sources_resolve
+    statement: >-
+      Every source reference used by a claim resolves to a real, fully-described source entry —
+      there are no dangling citations.
+    reproduce: "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q tests/test_data.py::test_every_source_ref_resolves"
+    expect: { exit_code: 0 }
+
+  - id: overclaim_caught
+    statement: >-
+      The corroboration engine downgrades a real over-claim in the guideline set to a single source
+      lineage (independent restatements do not count as independent corroboration), and its
+      validator flags that over-claim rather than passing it silently.
+    reproduce: >-
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q
+      tests/test_corroboration.py::test_overclaim_downgraded_to_single_lineage
+      tests/test_corroboration.py::test_validate_flags_the_overclaims
+    expect: { exit_code: 0 }
+
+  - id: target_vs_field
+    statement: >-
+      Design-target values are kept structurally separate from field-verified outcomes — the schema
+      carries both halves rather than collapsing "should achieve" into "was measured."
+    reproduce: "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q tests/test_data.py::test_target_vs_field_has_both_halves"
+    expect: { exit_code: 0 }
+
+  - id: untreated_unsafe
+    statement: >-
+      The safety guardrail never green-lights reuse of untreated excreta — untreated material always
+      returns UNSAFE.
+    reproduce: "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q tests/test_safe_reuse.py::test_untreated_is_always_unsafe"
+    expect: { exit_code: 0 }
+
+  - id: malawi_field_contradiction
+    statement: >-
+      Faced with the real Malawi case — short passive storage that a design target would call
+      sufficient — the guardrail returns UNSAFE, siding with the conservative field evidence over the
+      optimistic design target.
+    reproduce: "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q tests/test_safe_reuse.py::test_malawi_case_short_passive_storage_is_unsafe"
+    expect: { exit_code: 0 }
+
+  - id: unknown_not_a_guess
+    statement: >-
+      When evidence is insufficient (e.g. a mesophilic regime outside the modeled range), the
+      guardrail returns NOT ENOUGH EVIDENCE rather than guessing a reassuring SAFE.
+    reproduce: "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q tests/test_safe_reuse.py::test_mesophilic_is_unknown_not_a_guess"
+    expect: { exit_code: 0 }
+
+  - id: verification_plan_tiers
+    statement: >-
+      The guardrail emits a three-tier verification plan (process control point → E. coli indicator →
+      viable helminth egg count), ending in the hardest, most definitive helminth test.
+    reproduce: "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q tests/test_safe_reuse.py::test_verification_plan_has_three_tiers_ending_in_the_hard_helminth_test"
+    expect: { exit_code: 0 }
+
+  - id: dieoff_reproduces_anchors
+    statement: >-
+      The first-order die-off model reproduces published anchor points — the Nordin/Vinnerås
+      ammonia-inactivation data for Ascaris and the US EPA 503 thermal time-temperature points.
+    reproduce: >-
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q
+      tests/test_dieoff.py::test_ammonia_model_reproduces_nordin_anchors
+      tests/test_dieoff.py::test_thermal_epa_matches_known_points
+    expect: { exit_code: 0 }
