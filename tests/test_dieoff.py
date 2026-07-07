@@ -64,6 +64,7 @@ def test_kinetics_constants_are_sourced():
     assert dose["source"]["ref"]
     assert all(r["source"]["ref"] for r in dose["measured_total_am_mM"])
     assert dose["urine_total_am_mM"]["source"]["ref"]
+    assert dose["bulk_density_kg_per_L"]["source"]["ref"]      # volume→mass density is sourced too
 
 def test_faeces_query_uses_matrix_correct_t90_not_liquid_rate():
     # Salmonella's Table-3.8 rates are for greywater; a faeces query must fall back to T90

@@ -121,6 +121,8 @@
   #result .step .how{color:var(--ink-soft); font-size:.89rem}
   #result .dose{--st:var(--accent); margin-top:14px} #result .dose .tag{color:var(--accent-ink)}
   #result .dose .detail{line-height:1.7}
+  #result .dose select{display:inline; width:auto; padding:5px 9px; font-size:14px; margin:0 4px}
+  #result .dose .fix{margin:9px 0 0}
   .tool .always{font-size:.84rem; color:var(--ink-soft); margin-top:16px; border-top:1px dashed var(--line); padding-top:12px}
 
   .callout{
@@ -433,19 +435,33 @@
       }
       html += '</div>';
       // "how to get to safe" — a sourced dose plan when a solids design isn't safe yet
+      var doseTemp = null;
       if ((v.status === 'UNSAFE' || v.status === 'UNKNOWN') && m !== 'urine'){
-        var tt = val('i-temp'); var dt = (tt && !isNaN(tt)) ? tt : 25;
-        var dp = OpenWASH.dose_plan(dt);
+        var tt = val('i-temp'); doseTemp = (tt && !isNaN(tt)) ? tt : 25;
+        var dp = OpenWASH.dose_plan(doseTemp);
         html += '<div class="verdict dose"><div class="tag">→ How to sanitise it by ammonia</div>' +
                 '<p class="why">' + esc(dp.recommend) + '</p>' +
-                '<p class="fix">At ~' + esc(dt) + '&nbsp;°C, roughly: ' +
+                '<p class="fix">At ~' + esc(doseTemp) + '&nbsp;°C, roughly: ' +
                   dp.options.map(function(o){ return '<b>' + o.urea_pct + '% urea</b> → ~' + o.cure_days + ' days'; }).join(' · ') +
-                  ' (kept sealed, to hold the ammonia). Or use stored/hydrolysed urine (~' +
-                  dp.urine_alt_mM[0] + '–' + dp.urine_alt_mM[1] + '&nbsp;mM) — measure it.</p><div class="detail">';
+                  ' (kept sealed). Or stored/hydrolysed urine (~' + dp.urine_alt_mM[0] + '–' + dp.urine_alt_mM[1] + '&nbsp;mM) — measure it.</p>' +
+                '<p class="fix">For a <select id="dose-container">' +
+                  OpenWASH.CONTAINERS.map(function(c, i){ return '<option value="' + i + '"' + (c.key === 'drum200' ? ' selected' : '') + '>' + esc(c.label) + '</option>'; }).join('') +
+                  '</select>: <span id="dose-kg"></span></p><div class="detail">';
         dp.caveats.forEach(function(c){ html += '• ' + esc(c) + '<br>'; });
         html += '</div></div>';
       }
       result.innerHTML = html;
+      // wire the container dropdown → live kilograms
+      var csel = document.getElementById('dose-container');
+      if (csel && doseTemp != null){
+        var updateKg = function(){
+          var c = OpenWASH.CONTAINERS[+csel.value], span = document.getElementById('dose-kg');
+          if (!c.litres){ span.innerHTML = '<b>a pit can’t be sealed or mixed</b> — empty it into a drum and treat there.'; return; }
+          var pp = OpenWASH.dose_plan(doseTemp, c.litres);
+          span.innerHTML = 'add <b>~' + pp.options[0].urea_kg + '–' + pp.options[1].urea_kg + '&nbsp;kg urea</b> (1–2%, × your fill level).';
+        };
+        csel.addEventListener('change', updateKg); updateKg();
+      }
     }
 
     mat.addEventListener('change', function(){ renderInputs(); result.innerHTML=''; });

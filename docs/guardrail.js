@@ -41,11 +41,22 @@
     dose: {                          // ascaris.ammonia_model.dosing (Nordin 2009)
       self_buffer_pH: 9.0,
       reference_moisture_pct: 83,
+      bulk_density_kg_per_L: 1.05,   // Penn 2018 (faeces 1.06–1.09, FS 1.02–1.06) — volume→mass
       measured: [ { urea_pct: 1, total_mM: 441 }, { urea_pct: 2, total_mM: 675 } ],
       urine_alt_mM: [200, 280]       // stored/hydrolysed urine ~3–4 g N/L (Udert 2006)
     },
     routes: ['food_raw', 'food_processed', 'non_food', 'soil_only']
   };
+
+  // nominal container volumes (litres) — definitional UI, not sourced safety values.
+  var CONTAINERS = [
+    { key: 'bucket20', label: '20 L bucket / jerrycan (CBS)',   litres: 20,   sealable: true },
+    { key: 'cbs30',    label: '~30 L cartridge (Sanergy-type)', litres: 30,   sealable: true },
+    { key: 'drum120',  label: '120 L drum',                     litres: 120,  sealable: true },
+    { key: 'drum200',  label: '200 L drum (55 gal)',            litres: 200,  sealable: true },
+    { key: 'ibc1000',  label: '1000 L IBC tote',                litres: 1000, sealable: true },
+    { key: 'pit',      label: 'Pit latrine (uncertain)',        litres: null, sealable: false }
+  ];
 
   // ---- die-off primitives (port of engine/dieoff.py) ----
   function nh3_fraction(pH, tempC) {
@@ -186,22 +197,28 @@
     if (k <= 0) return null;
     return Math.max(Math.log10(initial / DATA.TARGET_EGG) / k, 2.0 / k);
   }
-  function dose_plan(temp) {
+  function dose_plan(temp, volume_L, fill) {
+    fill = (fill == null) ? 1.0 : fill;
     var ph = DATA.dose.self_buffer_pH;
+    var wet_kg = (volume_L != null) ? volume_L * fill * DATA.dose.bulk_density_kg_per_L : null;
     var options = DATA.dose.measured.map(function (row) {
       var cure = ammonia_cure_days(temp, row.total_mM, ph);
-      return { urea_pct: row.urea_pct, total_mM: row.total_mM, cure_days: (cure == null ? null : Math.round(cure)) };
+      var o = { urea_pct: row.urea_pct, total_mM: row.total_mM, cure_days: (cure == null ? null : Math.round(cure)) };
+      if (wet_kg != null) o.urea_kg = Math.round(wet_kg * row.urea_pct / 100.0 * 100) / 100;
+      return o;
     });
     return {
       recommend: 'Add 1–2% urea by wet weight (Nordin 2009 — a tested dose, not a guess). It self-raises ' +
         'pH to ~9 and reaches a sanitising ammonia dose in typical faeces.',
-      at_temp_C: temp, options: options,
+      at_temp_C: temp, wet_kg: (wet_kg == null ? null : Math.round(wet_kg * 10) / 10), options: options,
       urine_alt_mM: DATA.dose.urine_alt_mM, measure_threshold_mM: DATA.ammonia.threshold_mM,
       caveats: [
         'This is a PLANNING estimate — MEASURE total ammoniacal-N to confirm (Nordin reached 441–862 mM; ' +
           'you need well above the ~' + DATA.ammonia.threshold_mM + ' mM threshold), especially if the material ' +
           'is much drier or wetter than typical faeces (~' + DATA.dose.reference_moisture_pct + '% water).',
         'Ash or lime raise pH but add ~no nitrogen — use them WITH urea/urine, never instead.',
+        'Ammonia treatment needs a SEALED, mixable vessel (drum/bucket) — a pit can’t hold NH₃ or distribute ' +
+          'the urea, so empty it into a drum to treat.',
         'Keep it sealed at pH ≥9 to retain ammonia; colder material is BOTH slower and has less active NH₃ at the same pH.'
       ]
     };
@@ -250,7 +267,7 @@
   return {
     assess: assess, screen_storage: screen_storage, screen_ammonia: screen_ammonia,
     screen_thermal: screen_thermal, assess_urine: assess_urine, verification_plan: verification_plan,
-    dose_plan: dose_plan, ammonia_cure_days: ammonia_cure_days,
+    dose_plan: dose_plan, ammonia_cure_days: ammonia_cure_days, CONTAINERS: CONTAINERS,
     nh3_fraction: nh3_fraction, k_ammonia: k_ammonia, epa_thermal_days: epa_thermal_days,
     ascaris_rule: ascaris_rule, DATA: DATA
   };

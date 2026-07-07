@@ -106,6 +106,14 @@ sources:
     license: "peer-reviewed"
     doi: 10.2166/wst.2006.921
 
+  penn2018:
+    title: "Review of synthetic human faeces and faecal sludge for sanitation and wastewater research (bulk density of faeces & faecal sludge)"
+    org: "Penn, Ward, Strande & Maurer, Water Research 132:222–240"
+    year: 2018
+    lineage: fs_physical           # physical properties of faeces/FS (Eawag/Sandec review)
+    license: "peer-reviewed"
+    doi: 10.1016/j.watres.2017.12.063
+
   epa503:
     title: "40 CFR Part 503 — Standards for the Use or Disposal of Sewage Sludge (time–temperature requirement for Class A pathogen reduction)"
     org: "US EPA"

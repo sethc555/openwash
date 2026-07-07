@@ -25,13 +25,13 @@ environment:
 claims:
   - id: suite
     statement: >-
-      The full public test suite — 82 tests over the dataset, corroboration engine, die-off model,
+      The full public test suite — 83 tests over the dataset, corroboration engine, die-off model,
       technology selector, and safety guardrail (including regression tests pinning every defect the
       self-audit caught, and the browser↔Python parity check) — reproduces green.
     reproduce: "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q"
     expect:
       exit_code: 0
-      stdout_contains: "82 passed"
+      stdout_contains: "83 passed"
 
   - id: no_naked_numbers
     statement: >-
@@ -104,7 +104,7 @@ claims:
   - id: web_parity
     statement: >-
       The no-install browser guardrail (docs/guardrail.js) returns IDENTICAL verdicts to the Python
-      engine across 3,000+ reuse designs AND identical dose-planner kill-time estimates across
+      engine across 3,000+ reuse designs AND identical dose-planner kill-time AND container→kg estimates across
       temperature, and its embedded constants equal data/dieoff_kinetics.yaml — so the version a field
       worker runs in a browser is not a second, unattested source of truth.
     reproduce: "python3 tests/parity.py"

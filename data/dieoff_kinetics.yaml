@@ -79,6 +79,9 @@ organisms:
         self_buffer_pH: 9.0                 # urea hydrolysis self-buffers faeces to ~pH 9 (Nordin 2009)
         reference_moisture_pct: 83          # Nordin conditioned feces to 17% DM (~83% water); dose is for this
         ash_adds_no_nitrogen: true          # ash/lime RAISE pH but add ~0 N — cannot substitute for urea/urine
+        # bulk density to convert a container VOLUME → wet MASS (dose is % of wet weight, so only
+        # density is needed — NOT moisture, which is already inside both the wet weight and the density):
+        bulk_density_kg_per_L: {value: 1.05, range: [1.0, 1.1], source: {ref: penn2018}}   # faeces 1.06–1.09, FS 1.02–1.06
         # Nordin 2009 MEASURED total ammoniacal-N produced (mM) at the tested doses (feces @ 17% DM,
         # conservative 24 °C values; the 34 °C values are higher). The planner reads kill-TIME off the
         # kinetics at the batch temperature using these concentrations.

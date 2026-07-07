@@ -66,6 +66,9 @@ def _check_constants(jsdata):
         "ammonia.Q10": am["Q10"],
         "thermal.min_temp_C": tm["min_temp_C"],
         "thermal.const_ge_7pct": tm["solids_ge_7pct_constant"],
+        "dose.bulk_density": am["dosing"]["bulk_density_kg_per_L"]["value"],
+        "dose.measured_1pct": am["dosing"]["measured_total_am_mM"][0]["total_am_mM"],
+        "dose.measured_2pct": am["dosing"]["measured_total_am_mM"][1]["total_am_mM"],
     }
     got = {
         "storage_meta_k": jsdata["storage_meta_k"],
@@ -75,6 +78,9 @@ def _check_constants(jsdata):
         "ammonia.Q10": jsdata["ammonia"]["Q10"],
         "thermal.min_temp_C": jsdata["thermal"]["min_temp_C"],
         "thermal.const_ge_7pct": jsdata["thermal"]["const_ge_7pct"],
+        "dose.bulk_density": jsdata["dose"]["bulk_density_kg_per_L"],
+        "dose.measured_1pct": jsdata["dose"]["measured"][0]["total_mM"],
+        "dose.measured_2pct": jsdata["dose"]["measured"][1]["total_mM"],
     }
     errs = []
     for k in want:
@@ -112,16 +118,25 @@ def check():
     const_errs = _check_constants(json.loads(dproc.stdout)) if dproc.returncode == 0 else \
         [f"could not read JS constants: {dproc.stderr}"]
 
-    # dose-planner parity — the recommended-dose kill-time estimates must match across temperature
+    # dose-planner parity — kill-time AND container→kg estimates must match (temps × container volumes)
     temps = list(range(4, 46, 2))
-    py_dose = [[o["cure_days"] for o in SR.dose_plan(t)["options"]] for t in temps]
-    dscript = ("var G=require(process.argv[1]);var ts=JSON.parse(process.argv[2]);"
-               "process.stdout.write(JSON.stringify(ts.map(function(t){"
-               "return G.dose_plan(t).options.map(function(o){return o.cure_days;});})));")
-    dp = subprocess.run([node, "-e", dscript, GUARDRAIL_JS, json.dumps(temps)],
+    vols = [None, 20, 30, 120, 200, 1000]
+    py_dose = [[[o["cure_days"], o.get("urea_kg")] for o in SR.dose_plan(t, v)["options"]]
+               for t in temps for v in vols]
+    dscript = ("var G=require(process.argv[1]);var jobs=JSON.parse(process.argv[2]);"
+               "process.stdout.write(JSON.stringify(jobs.map(function(j){"
+               "return G.dose_plan(j[0], j[1]).options.map(function(o){"
+               "return [o.cure_days, (o.urea_kg==null?null:o.urea_kg)];});})));")
+    jobs = [[t, v] for t in temps for v in vols]
+    dp = subprocess.run([node, "-e", dscript, GUARDRAIL_JS, json.dumps(jobs)],
                         capture_output=True, text=True, timeout=30)
     js_dose = json.loads(dp.stdout) if dp.returncode == 0 else None
-    dose_ok = (js_dose == py_dose)
+    def _close(a, b):
+        if a is None or b is None: return a == b
+        return abs(a - b) <= 0.011
+    dose_ok = js_dose is not None and len(js_dose) == len(py_dose) and all(
+        _close(py_dose[i][k][0], js_dose[i][k][0]) and _close(py_dose[i][k][1], js_dose[i][k][1])
+        for i in range(len(py_dose)) for k in range(len(py_dose[i])))
 
     ok = not mism and not const_errs and dose_ok
     lines = [f"parity: {len(cases) - len(mism)}/{len(cases)} verdicts identical (Python ↔ browser JS)"]
@@ -131,7 +146,7 @@ def check():
         lines.append(f"  … and {len(mism) - 20} more")
     for e in const_errs:
         lines.append(f"  {e}")
-    lines.append(f"dose planner: {len(temps)}/{len(temps)} temperatures with identical kill-time estimates"
+    lines.append(f"dose planner: {len(temps)}×{len(vols)} temp×container dose cases identical"
                  if dose_ok else f"  DOSE MISMATCH: python={py_dose} js={js_dose}")
     if ok:
         lines.append("constants: JS matches data/dieoff_kinetics.yaml ✓")

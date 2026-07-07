@@ -91,6 +91,20 @@ def test_dose_plan_recommends_the_tested_urea_dose_conservatively():
     assert "ash" in caveats and "no nitrogen" in caveats
     assert "measure" in caveats
 
+def test_dose_plan_container_to_kilograms():
+    # a container VOLUME converts to a urea MASS via the sourced bulk density (~1.05 kg/L)
+    p = SR.dose_plan(24, volume_L=200)                     # a 200 L drum
+    kg = {o["urea_pct"]: o["urea_kg"] for o in p["options"]}
+    assert abs(kg[1] - 200 * 1.05 * 0.01) < 0.05          # 1% of ~210 kg wet ≈ 2.1 kg
+    assert abs(kg[2] - 200 * 1.05 * 0.02) < 0.05          # 2% ≈ 4.2 kg
+    assert kg[2] > kg[1]
+    # fill level scales it; no volume → no kg (just the % recommendation)
+    assert SR.dose_plan(24, volume_L=200, fill=0.5)["options"][0]["urea_kg"] < kg[1]
+    assert "urea_kg" not in SR.dose_plan(24)["options"][0]
+    # a pit is flagged as not sealable/mixable (empty-then-treat), not given a confident dose
+    pit = [c for c in SR.CONTAINERS if c["key"] == "pit"][0]
+    assert pit["litres"] is None and pit["sealable"] is False
+
 def test_process_tier_matches_the_treatment():
     assert "pH" in " ".join(SR.verification_plan("sludge", "ammonia", (30, 60, 9.1), "soil_only")[0])
     assert "centre" in " ".join(SR.verification_plan("sludge", "thermal", (55, 10), "non_food")[0]).lower()

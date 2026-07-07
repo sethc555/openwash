@@ -30,6 +30,16 @@ ASC = DATA["organisms"]["ascaris"]
 AM  = ASC["ammonia_model"]
 
 DOSE = AM.get("dosing", {})                        # sourced amendment-dose planning data (Nordin 2009)
+# Nominal container volumes (litres) — definitional unit-conversions / UI, NOT sourced safety values.
+# sealable=False → cannot hold NH3 or distribute urea (a pit): empty-then-treat in a drum instead.
+CONTAINERS = [
+    {"key": "bucket20", "label": "20 L bucket / jerrycan (CBS)",   "litres": 20,   "sealable": True},
+    {"key": "cbs30",    "label": "~30 L cartridge (Sanergy-type)", "litres": 30,   "sealable": True},
+    {"key": "drum120",  "label": "120 L drum",                     "litres": 120,  "sealable": True},
+    {"key": "drum200",  "label": "200 L drum (55 gal)",            "litres": 200,  "sealable": True},
+    {"key": "ibc1000",  "label": "1000 L IBC tote",                "litres": 1000, "sealable": True},
+    {"key": "pit",      "label": "Pit latrine (uncertain)",        "litres": None, "sealable": False},
+]
 TARGET_EGG = 1.0                                   # <=1 viable helminth egg / g TS (WHO 2006 Vol 4)
 REP_TOTAL_AMMONIACAL_MM = 200.0                    # representative hydrolysed-urine/urea dose (mM total N)
 ECOLI_LIMIT = 1000                                 # <1000 CFU/g TS (WHO 2006 Vol 4)  — verify_faeces_ecoli
@@ -197,27 +207,35 @@ def _ammonia_cure_days(temp, total_mM, pH, initial_eggs=40):
         return None
     return max(math.log10(initial_eggs / TARGET_EGG) / k, 2.0 / k)
 
-def dose_plan(temp):
+def dose_plan(temp, volume_L=None, fill=1.0):
     """A SOURCED amendment-dose plan to sanitise faeces/faecal sludge by ammonia (Nordin 2009).
 
     Recommends the TESTED urea dose (not one back-computed from an unknown moisture), and reads the
-    kill TIME off the same kinetics the screen uses. It is a PLANNING estimate — the concentration a
-    dose reaches depends on the batch's water content (too variable to assume), so the plan ends where
-    every path here ends: measure the actual dose to confirm. Returns None if no dose data is loaded.
+    kill TIME off the same kinetics the screen uses. If a container `volume_L` (× `fill` level) is
+    given, converts it to a urea MASS via the sourced bulk density (Penn 2018) — this needs only
+    density, not moisture (moisture is already inside both the wet weight and the density). It is a
+    PLANNING estimate — the concentration a dose reaches still depends on the batch's water content,
+    so the plan ends where every path here ends: measure the actual dose. None if no dose data loaded.
     """
     if not DOSE.get("measured_total_am_mM"):
         return None
     ph = DOSE.get("self_buffer_pH", 9.0)
+    density = (DOSE.get("bulk_density_kg_per_L") or {}).get("value", 1.05)
+    wet_kg = (volume_L * fill * density) if volume_L else None
     options = []
     for row in DOSE["measured_total_am_mM"]:
         cure = _ammonia_cure_days(temp, row["total_am_mM"], ph)
-        options.append({"urea_pct": row["urea_pct"], "total_mM": row["total_am_mM"],
-                        "cure_days": (None if cure is None else round(cure))})
+        opt = {"urea_pct": row["urea_pct"], "total_mM": row["total_am_mM"],
+               "cure_days": (None if cure is None else round(cure))}
+        if wet_kg is not None:
+            opt["urea_kg"] = round(wet_kg * row["urea_pct"] / 100.0, 2)
+        options.append(opt)
     return {
         "recommend": "Add 1–2% urea by wet weight (Nordin 2009 — a tested dose, not a guess). "
                      "It self-raises pH to ~9 and reaches a sanitising ammonia dose in typical faeces.",
         "at_temp_C": temp,
-        "options": options,          # e.g. 1% urea → ~N days, 2% urea → ~M days at this temperature
+        "wet_kg": (None if wet_kg is None else round(wet_kg, 1)),
+        "options": options,          # e.g. 1% urea → ~N days (and ~K kg urea for the container)
         "urine_alt_mM": DOSE.get("urine_total_am_mM", {}).get("stored_hydrolysed"),
         "measure_threshold_mM": AM.get("threshold_mM"),
         "caveats": [
@@ -226,6 +244,8 @@ def dose_plan(temp):
             "much drier or wetter than typical faeces (~%s%% water)."
             % (AM.get("threshold_mM"), DOSE.get("reference_moisture_pct")),
             "Ash or lime raise pH but add ~no nitrogen — use them WITH urea/urine, never instead.",
+            "Ammonia treatment needs a SEALED, mixable vessel (drum/bucket) — a pit can't hold NH₃ or "
+            "distribute the urea, so empty it into a drum to treat.",
             "Keep it sealed at pH ≥9 to retain ammonia; colder material is BOTH slower and has less "
             "active NH₃ at the same pH.",
         ],
@@ -289,6 +309,13 @@ def print_dose_plan(temp):
     print(f"  {p['recommend']}")
     print(f"  At ~{temp}°C, roughly:  " +
           "  ·  ".join(f"{o['urea_pct']}% urea → ~{o['cure_days']} d" for o in p["options"]) + "  (kept sealed).")
+    print("  Urea to add, by container (× your fill level):")
+    for c in CONTAINERS:
+        if not c["litres"]:
+            print(f"    · {c['label']}: can't be sealed or mixed — empty into a drum and treat there.")
+            continue
+        pc = dose_plan(temp, c["litres"])
+        print(f"    · {c['label']}: ~{pc['options'][0]['urea_kg']}–{pc['options'][1]['urea_kg']} kg urea (1–2%)")
     if p.get("urine_alt_mM"):
         print(f"  Or stored/hydrolysed urine (~{p['urine_alt_mM'][0]}–{p['urine_alt_mM'][1]} mM) — measure it.")
     for c in p["caveats"]:
