@@ -40,6 +40,8 @@ def _v(status, reason, fix=None, detail=None):
 
 def screen_storage(temp, days, material_label, initial_eggs=40):
     """Passive storage of solids — conservative Ascaris screen (rule + model + field)."""
+    if initial_eggs <= 0:
+        return _v("UNKNOWN", "initial egg load must be positive to screen a design.", None)
     rule = D.ascaris_rule(ASC, temp, days)
     lr, basis, flag = D.log_reduction(ASC, temp, days, "faeces")
     resid = initial_eggs * 10 ** (-lr) if lr is not None else None
@@ -81,6 +83,8 @@ def screen_ammonia(temp, days, pH, total_mM, material_label, initial_eggs=40):
     lime or ash can push pH ≥9 while adding little or no nitrogen, so a pH-only screen
     would falsely clear a batch with essentially no ammonia. Without a dose → UNKNOWN.
     """
+    if initial_eggs <= 0:
+        return _v("UNKNOWN", "initial egg load must be positive to screen a design.", None)
     if total_mM is None:
         return _v("UNKNOWN",
                   "Ammonia inactivation is driven by the actual ammonia DOSE, which pH alone cannot "
@@ -141,6 +145,11 @@ ROUTE_NOTE = {
 
 def assess(material, treatment, params, route):
     """Return a verdict dict for solids/faecal reuse. Urine handled separately."""
+    if route not in ROUTE_NOTE:
+        # fail CLOSED on an unrecognised reuse route — never assume the most permissive one
+        # (urine's storage need is route-dependent, so an unknown route must not read as SAFE).
+        return _v("UNKNOWN", f"Unrecognised reuse route '{route}'.",
+                  f"Use one of: {', '.join(ROUTE_NOTE)} (raw-eaten crops are the strictest).")
     if material == "urine":
         return assess_urine(treatment, params, route)
     ml = {"faeces": "faeces", "sludge": "faecal sludge", "mixed": "settled blackwater solids",

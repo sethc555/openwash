@@ -40,6 +40,11 @@ def test_cold_urine_storage_is_unknown_not_safe():
     # WHO urine-storage times assume ~20°C; a 4°C store on a raw-crop route must not read SAFE.
     assert SR.assess("urine", "storage", (4, 6), "food_raw")["status"] == "UNKNOWN"
 
+def test_unrecognised_route_fails_closed_not_safe():
+    # round-5 fix: an unknown reuse route must not fall through to the most-permissive verdict.
+    assert SR.assess("urine", "storage", (20, 0), "raw")["status"] == "UNKNOWN"          # misspelled food_raw
+    assert SR.assess("sludge", "storage", (25, 400), "outer_space")["status"] == "UNKNOWN"
+
 def test_thermal_time_temperature_law():
     assert status("sludge", "thermal", (52, 3), "non_food") == "UNSAFE"           # EPA needs ~6.9 d
     assert status("sludge", "thermal", (55, 10), "non_food") == "SAFE_SCREEN"

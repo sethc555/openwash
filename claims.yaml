@@ -25,13 +25,13 @@ environment:
 claims:
   - id: suite
     statement: >-
-      The full public test suite — 77 tests over the dataset, corroboration engine, die-off model,
+      The full public test suite — 80 tests over the dataset, corroboration engine, die-off model,
       technology selector, and safety guardrail (including regression tests pinning every defect the
       self-audit caught) — reproduces green.
     reproduce: "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q"
     expect:
       exit_code: 0
-      stdout_contains: "77 passed"
+      stdout_contains: "80 passed"
 
   - id: no_naked_numbers
     statement: >-
@@ -81,7 +81,10 @@ claims:
       25°C) — below the WHO categorical rule of ~1 year at that temperature — rather than shipping
       the shorter guidance as safe; the field study (Kumwenda 2019) that recorded the failure is
       cited in the fix as why the bound is a floor.
-    reproduce: "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q tests/test_safe_reuse.py::test_malawi_case_short_passive_storage_is_unsafe"
+    reproduce: >-
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q
+      tests/test_safe_reuse.py::test_malawi_case_short_passive_storage_is_unsafe
+      tests/test_dieoff.py::test_ascaris_storage_rule_screens_short_and_passes_long
     expect: { exit_code: 0 }
 
   - id: unknown_not_a_guess

@@ -67,7 +67,9 @@ def k_at(org, temp, matrix):
                "OK (current meta-analysis; temperature-independent < 50 °C)"
     t90 = (org.get("t90_days", {}).get(matrix) or {}).get("mean")
     if t90:
-        return 1.0 / t90, f"1/T90 @ ref {org.get('ref_temp_C')}°C (no temp scaling)", \
+        rt = org.get("ref_temp_C")
+        rt_s = f"{rt[0]}–{rt[1]}" if isinstance(rt, (list, tuple)) else rt
+        return 1.0 / t90, f"1/T90 @ ref {rt_s}°C (no temp scaling)", \
                "LOW (no temperature model — reference T90 only)"
     return None, "no data", "NONE"
 

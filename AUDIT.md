@@ -138,7 +138,7 @@ guardrail (which held), all in the secondary CLI/query/docs surfaces that had ne
 | # | Defect (verified) | Failure it caused | Fix |
 |---|---|---|---|
 | **HIGH** | **`cmd_query` printed a fixed "= 6 log" example for every requirement.** A hardcoded "treatment 4 + field 1 + washing 1 = 6 log" line was printed verbatim even for a **7-log** requirement. | A user irrigating **root crops** (7-log) who followed the shown "valid combination" would **under-treat by 10×**. | The example now states the *actual* required total and, for >6-log scenarios, explicitly says a 6-log combination is **NOT sufficient** and one more barrier is needed. |
-| **HIGH** | **The `dieoff.py` ammonia CLI didn't clamp NH₃.** The guardrail (`safe_reuse.py`) capped the dose at the 250 mM calibration ceiling, but the raw `k_ammonia` rate — used directly by the CLI — did not, so it over-predicted inactivation at high doses. | `ammonia --nh3 440 --days 6` returned a **false pass** (model t99 ≈ 3 d) where the independent Fidjeland data says ~6.4 d → actually **UNSAFE**. | The clamp moved **into `k_ammonia`** (single guard for every caller), sourced from a new `nh3_saturation_mM` data field. 440 mM now clamps to 250 → t99 ≈ 6 d → correctly UNSAFE. |
+| **HIGH** | **The `dieoff.py` ammonia CLI didn't clamp NH₃.** The guardrail (`safe_reuse.py`) capped the dose at the 250 mM calibration ceiling, but the raw `k_ammonia` rate — used directly by the CLI — did not, so it over-predicted inactivation at high doses. | `ammonia --nh3 440 --days 6` returned a **false pass** (model t99 ≈ 3 d) where the independent Fidjeland data says ~6.4 d → actually **UNSAFE**. | The clamp moved **into `k_ammonia`** (single guard for every caller), sourced from a new `nh3_saturation_mM` data field. 440 mM now clamps to 250, so the rate no longer over-predicts (t99 at 34 °C ≈ 6 d, was ~3 d; matches the independent Fidjeland anchor) — the design that previously false-passed now screens out at a realistic load. |
 | **HIGH** | **The public explainer laundered an over-claim.** `docs/index.html` stamped the ≤1 egg/g threshold **"multi-corroborated"** — the exact `claimed_tier` the engine *catches and downgrades* to `single_lineage`, printed in the section that brags about catching over-claims. | The public face published the over-stated tier the whole project exists to refuse. | Corrected to "single lineage" (matching the engine's computed tier). |
 | **MED** | **`cmd_query` defaulted to the *least* conservative match.** With no `--crop`, it returned the first-in-file requirement (leaf, 6-log), ignoring root (7-log). | A user omitting crop and growing root crops was told 6 when the data says 7. | Under-specified scenarios now select the **most conservative** matching requirement. |
 | **MED** | **`cmd_storage` printed false arithmetic.** When no WHO band covered the temperature but the model passed, it printed "UNSAFE — residual X > 1.0" with X < 1.0. | Confusing (errs safe, but the printed statement was arithmetically wrong). | Split out: no-band + model-pass → an honest "advisory — verify by measurement," not a false UNSAFE. |
@@ -152,7 +152,35 @@ label is not self-consistent with `2/k` under the log-linear model (independentl
 engine uses `k`, not that label). Unbounded extrapolation in `predict` still reports absurd
 log-reductions (flagged `LOW (extrapolation)`, conservative in direction).
 
-## 6. What still holds (and what remains excluded — honestly)
+## 6. Round 5 — mutation-test the attestation; sweep the glue code (2026-07-07)
+
+By this round the core had survived four passes, so Round 5 pushed on new angles: **mutation-testing
+the attestation** (break each claimed behavior, confirm its claim goes red — the deepest check that
+the 10/10 isn't theater), a full **accuracy sweep of this ledger itself**, robustness/edge inputs
+across every engine, and the small glue code (`watch.py`, the arg dispatchers, the render helpers,
+`limitations.yaml`). Four auditors; suite 77 → **80**. **No HIGH this round** — the mutation test
+confirmed all ten claims genuinely gate their statements, and the core guardrail held.
+
+| # | Defect (verified) | Failure it caused | Fix |
+|---|---|---|---|
+| **MED** | **`assess()` failed open on an unrecognised reuse route.** `assess_urine` mapped any route it didn't know to the least-strict (`need = 0`). | `assess("urine", …, route="raw")` (a misspelled `food_raw`) returned **SAFE** with zero storage. | `assess()` now validates the route against the known set and returns **UNKNOWN** on anything else. |
+| **MED** | **`cmd_query` returned a false-reassuring empty.** A valid `--use` with an unlisted crop/labour (e.g. `--crop tomato`) printed "no matching reduction requirement" — which reads as *no requirement*. | A user with a crop not spelled exactly `leaf`/`root` got no number instead of the strict one. | Now falls back to the **most-conservative** requirement for the use, with a note; only a genuinely unknown *use* returns empty (and lists the known ones). |
+| **MED** | **`limitations.yaml` was never surfaced to a user.** The register was test-only; the `rotavirus_index_assumption` that qualifies the 6/7-log targets never reached the query that prints them. | The engine emitted the log-reduction number with no hint it's rotavirus-indexed (norovirus-indexing could shift it). | `cmd_query` now resolves and prints the limitations that qualify the number, **at the number.** |
+| **MED** | **This ledger's own Round-4 ammonia row overstated the verdict.** It said "→ correctly UNSAFE"; at 34 °C the clamped design is a *cautioned pass*, UNSAFE only at a realistic load/lower temp. | Ledger inaccuracy (safe direction). | Row corrected to state the clamp stops the over-prediction, without the absolute verdict claim. |
+| **LOW** | Garbage-input fail-open (`initial_eggs ≤ 0` → SAFE / a `ValueError`); render sentinels leaked (`unit: none` printed the word "none"; `ref_temp_C` list printed as `[20, 30]`). | Latent (not user-reachable) / cosmetic. | Non-positive load → UNKNOWN; the `none` unit and list temps render cleanly. |
+| **gating** | **The `malawi` claim pinned the outcome but not its named mechanism.** Mutation testing showed breaking the WHO categorical rule alone didn't fail the claim (the die-off model redundantly backstopped it). | The claim's wording emphasized a rule the test didn't isolate. | Added the rule test to the claim's reproduce command, so breaking the WHO rule now fails the claim. |
+
+**Recorded, not fixed:** the `overclaim_caught` claim's validator half is loosely gated (satisfied by
+any surviving over-claim) though its downgrade half is strong; the `predict` extrapolation is still
+unbounded (flagged, conservative-direction); the prose-only `pecson2007`/`manga2023` lineages remain
+uncomputed; the `t99_days: 429` label remains an independently-reported median, not `2/k`.
+
+**The shape of five rounds, honestly:** Round 1 changed core *conclusions* (the optimistic economics);
+Rounds 2–4 fixed core and near-core *false-safes* (the guardrail, the systems flags, the CLI); Round 5
+found **no HIGH** and confirmed the attestation is real. Severity has fallen monotonically —
+the signal that the safety-critical surface is genuinely swept, not that the audits stopped looking.
+
+## 7. What still holds (and what remains excluded — honestly)
 
 **Survives the audit, sharper for it:** treatment is a rounding error (~3–5% of opex); collection and
 demand and subsidy are the binding constraints; the safety substrate, the corroboration engine, and

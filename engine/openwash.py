@@ -27,6 +27,14 @@ def load():
         data = yaml.safe_load(f)
     return sources, data
 
+def load_limitations():
+    with open(os.path.join(ROOT, "data/limitations.yaml")) as f:
+        return yaml.safe_load(f)["limitations"]
+
+def caveats_for(substring):
+    """Limitations whose `affects` field mentions `substring` — surfaced at the point of decision."""
+    return [l for l in load_limitations() if substring in l.get("affects", "")]
+
 # ---- helpers ---------------------------------------------------------------
 def fmt_val(v):
     if isinstance(v, dict):
@@ -39,7 +47,10 @@ def fmt_val(v):
 
 def fmt_value_block(vb):
     q = vb.get("qualifier", "")
-    return f"{q}{fmt_val(vb['value'])} {vb.get('unit','')}".strip()
+    unit = vb.get("unit", "")
+    if unit == "none":            # sentinel: this value carries no unit — don't render the word
+        unit = ""
+    return f"{q}{fmt_val(vb['value'])} {unit}".strip()
 
 def cite(ref_obj, sources):
     r = ref_obj["ref"]
@@ -167,29 +178,37 @@ def cmd_report(sources, data):
 def cmd_query(sources, data, use, crop=None, labour=None):
     print(f"CAPABILITY QUERY: use={use} crop={crop} labour={labour}\n")
     def _reqnum(v): return v["max"] if isinstance(v, dict) else v
-    # find matching log-reduction requirement(s)
-    matches = []
-    for c in data["claims"]:
-        if c["category"] != "log_reduction_requirement": continue
-        sc = c.get("scenario", {})
-        if sc.get("use") != use: continue
-        if crop and sc.get("crop") and sc["crop"] != crop: continue
-        if labour and sc.get("labour") and sc["labour"] != labour: continue
-        if (crop and sc.get("crop")==crop) or (labour and sc.get("labour")==labour) or (not crop and not labour):
-            matches.append(c)
-    if not matches:
-        print("  no matching reduction requirement."); return
-    # under-specified scenario (e.g. no crop) → SIDE WITH THE MOST CONSERVATIVE requirement
-    match = max(matches, key=lambda c: _reqnum(c["value"]["value"]))
+    # all requirements for this use; then prefer an exact crop/labour match, else FALL BACK to the
+    # most-conservative requirement for the use — never return an empty (false-reassuring) result.
+    use_matches = [c for c in data["claims"]
+                   if c["category"] == "log_reduction_requirement"
+                   and c.get("scenario", {}).get("use") == use]
+    if not use_matches:
+        print(f"  no reduction requirement on record for use='{use}'.")
+        print(f"  (known uses: {sorted({c['scenario']['use'] for c in data['claims'] if c.get('scenario',{}).get('use')})})")
+        return
+    exact = [c for c in use_matches
+             if (crop and c["scenario"].get("crop") == crop)
+             or (labour and c["scenario"].get("labour") == labour)]
+    inexact = (crop or labour) and not exact
+    pool = exact if exact else use_matches
+    match = max(pool, key=lambda c: _reqnum(c["value"]["value"]))
     req = match["value"]["value"]
     reqn = _reqnum(req)
-    if len(matches) > 1:
-        print(f"  ({len(matches)} scenarios match; showing the MOST CONSERVATIVE — "
+    if inexact:
+        print(f"  (no scenario matches crop={crop!r}/labour={labour!r} for this use; showing the "
+              f"STRICTEST requirement for '{use}' — conservative)")
+    elif len(pool) > 1:
+        print(f"  ({len(pool)} scenarios match; showing the MOST CONSERVATIVE — "
               f"specify --crop/--labour to narrow)")
     print(f"  Required reduction: {req} log10  (scenario: {match.get('scenario', {})})")
     for s in match["value"]["sources"]:
         print(f"    src: {cite(s, sources)}")
-    print(f"    computed tier: {computed_tier(match['value'], sources)}\n")
+    print(f"    computed tier: {computed_tier(match['value'], sources)}")
+    # surface the known limitations that qualify THIS number, at the point of decision
+    for lim in caveats_for("logred"):
+        print(f"    ⚠ caveat ({lim['id']}): {' '.join(lim['finding'].split())}")
+    print()
     print("  Barrier menu to reach it (credits summed must total ≥ the requirement):")
     for c in data["claims"]:
         if c["category"] == "barrier_credit":

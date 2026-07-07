@@ -15,6 +15,23 @@ def test_query_defaults_to_the_most_conservative_requirement():
     assert "7 log10" in out and "MOST CONSERVATIVE" in out
     assert "NOT sufficient here" in out          # never blesses a short combo for a 7-log need
 
+def test_query_unmatched_crop_falls_back_conservative_not_empty():
+    # round-5 fix: a valid use with an unlisted crop must fall back to the STRICTEST requirement,
+    # never print a false-reassuring "no matching reduction requirement".
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        openwash.cmd_query(SOURCES, DATA, "unrestricted_irrigation", crop="tomato")
+    out = buf.getvalue()
+    assert "no matching" not in out.lower()
+    assert "7 log10" in out and "STRICTEST" in out
+
+def test_query_surfaces_the_rotavirus_caveat_at_the_number():
+    # round-5 fix: the limitation qualifying the 6/7-log target must surface where the number is shown.
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        openwash.cmd_query(SOURCES, DATA, "unrestricted_irrigation", crop="root")
+    assert "rotavirus_index_assumption" in buf.getvalue()
+
 def test_overclaim_downgraded_to_single_lineage():
     # WHO Vol4+Vol2+SSP all cite the 6/7-log target, but share one lineage
     c = BYID["logred_unrestricted_leaf"]
