@@ -59,6 +59,8 @@
       dose_pit: 'a pit can’t be sealed or mixed — empty it into a drum and treat there.',
       confirm_h: 'Now confirm it on the real batch — cheap to hard',
       always: 'Always true. This is a SCREEN, not a safety certificate — the batch still needs testing before reuse. It says nothing about chemical hazards (antibiotic resistance, heavy metals, pharmaceuticals). And it is not medical advice.',
+      share_h: 'Use it on a phone',
+      share_body: 'Scan the code, or open the link. It works OFFLINE once loaded — no signal needed. Your browser may also offer “Add to Home screen” to keep it like an app.',
       fr_notice: ''
     },
     fr: {
@@ -107,6 +109,8 @@
       dose_pit: 'une fosse ne peut être ni scellée ni mélangée — videz-la dans un fût et traitez-la là.',
       confirm_h: 'Confirmez-le maintenant sur le lot réel — du simple au difficile',
       always: 'Toujours vrai. Ceci est un DÉPISTAGE, pas un certificat de sécurité — le lot doit encore être testé avant réutilisation. Il ne dit rien des dangers chimiques (résistance aux antibiotiques, métaux lourds, produits pharmaceutiques). Et ce n’est pas un avis médical.',
+      share_h: 'Utilisez-le sur un téléphone',
+      share_body: 'Scannez le code, ou ouvrez le lien. Il fonctionne HORS LIGNE une fois chargé — aucun réseau nécessaire. Votre navigateur peut aussi proposer « Ajouter à l’écran d’accueil » pour le garder comme une application.',
       fr_notice: 'Traduction provisoire — à faire vérifier par un locuteur natif / expert WASH. Le verdict (la couleur et les chiffres) est universel ; les explications détaillées restent en anglais en attendant une traduction spécialisée révisée.'
     }
   };

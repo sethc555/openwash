@@ -2,9 +2,9 @@
  * Cache-first for the app shell (so a field worker with no signal still gets a verdict);
  * bump CACHE when any cached asset changes. SPDX-License-Identifier: Apache-2.0 */
 'use strict';
-var CACHE = 'openwash-v1';
+var CACHE = 'openwash-v2';
 var ASSETS = [
-  './', './index.html', './guardrail.js', './i18n.js',
+  './', './index.html', './guardrail.js', './i18n.js', './qr.svg',
   './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'
 ];
 

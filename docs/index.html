@@ -135,6 +135,14 @@
   .lang button[aria-pressed="true"]{background:var(--accent); color:var(--paper); border-color:var(--accent)}
   #result .fr-note{font-family:var(--mono); font-size:11.5px; color:var(--unknown); border:1px dashed var(--line-strong);
     border-radius:6px; padding:8px 11px; margin:0 0 12px; line-height:1.5}
+  .share{display:flex; gap:18px; align-items:center; margin-top:22px; border:1px solid var(--line);
+    border-radius:9px; background:var(--paper-2); padding:18px 20px; flex-wrap:wrap}
+  .share .qrbox{background:#fff; border-radius:8px; padding:8px; flex:none; line-height:0}
+  .share .qrbox img{display:block; width:118px; height:118px}
+  .share .txt{flex:1 1 240px}
+  .share .txt h3{font-family:var(--serif); font-size:1.15rem; margin:0 0 5px}
+  .share .txt p{margin:0 0 8px; font-size:.96rem}
+  .share .txt a{font-family:var(--mono); font-size:13px; word-break:break-all}
   .tool .always{font-size:.84rem; color:var(--ink-soft); margin-top:16px; border-top:1px dashed var(--line); padding-top:12px}
 
   .callout{
@@ -290,6 +298,14 @@
         <button class="go" id="f-go" type="button" data-i18n="btn_check">Check</button>
         <div id="result" aria-live="polite"></div>
         <div class="always" data-i18n="always"><b>Always true.</b> This is a SCREEN, not a safety certificate — the batch still needs testing before reuse. It says nothing about chemical hazards (antibiotic resistance, heavy metals, pharmaceuticals). And it is not medical advice.</div>
+      </div>
+      <div class="share">
+        <div class="qrbox"><img src="qr.svg" alt="QR code — open OpenWASH" width="118" height="118"></div>
+        <div class="txt">
+          <h3 data-i18n="share_h">Use it on a phone</h3>
+          <p data-i18n="share_body">Scan the code, or open the link. It works OFFLINE once loaded — no signal needed. Your browser may also offer “Add to Home screen” to keep it like an app.</p>
+          <a href="https://sethc555.github.io/openwash/">sethc555.github.io/openwash</a>
+        </div>
       </div>
     </div>
   </section>
