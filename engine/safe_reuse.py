@@ -56,38 +56,63 @@ def screen_storage(temp, days, material_label, initial_eggs=40):
                   f"far faster, OR heat-compost ≥50°C. Deployed passive storage has under-performed in "
                   f"the field (Kumwenda 2019, Malawi), so treat this bound as a floor.",
                   f"model: {lr:.1f} log → {resid:.2g} eggs/g ({flag}); rule band {rule['band']}.")
+    # Rule says it meets — but SIDE WITH THE CONSERVATIVE SIGNAL: if the first-order
+    # die-off model still leaves > the target at this exact point (typical at the rule-band
+    # floor), do not bless it. The two signals must AGREE for a SAFE screen.
+    if resid is not None and resid > TARGET_EGG:
+        return _v("UNSAFE",
+                  f"Storage {days} d at {temp}°C meets the WHO categorical rule band, but the first-order "
+                  f"die-off model still leaves ~{resid:.2g} viable eggs/g (target ≤{TARGET_EGG:.0f}); the "
+                  f"conservative signal governs.",
+                  f"Hold longer — the model clears ≤1 egg/g only past the rule-band floor — or add "
+                  f"urine/urea/ash (pH ≥9) to sanitise by ammonia, or heat-compost ≥50°C; then re-check.",
+                  f"model: {lr:.1f} log → {resid:.2g} eggs/g ({flag}); rule band {rule['band']}.")
     return _v("SAFE_SCREEN",
-              f"Storage {days} d at {temp}°C meets the WHO categorical rule (needs "
-              f"{rule['need_days'][0]}–{rule['need_days'][1]} d) for ≤1 viable egg/g.",
+              f"Storage {days} d at {temp}°C meets both the WHO categorical rule (needs "
+              f"{rule['need_days'][0]}–{rule['need_days'][1]} d) and the first-order model for ≤1 viable egg/g.",
               None,
               f"model: {lr:.1f} log → {resid:.2g} eggs/g ({flag}); rule band {rule['band']}.")
 
-def screen_ammonia(temp, days, pH, material_label, initial_eggs=40, total_mM=REP_TOTAL_AMMONIACAL_MM):
-    """Urine/urea/ash amendment — ammonia (uncharged NH3) inactivation."""
+def screen_ammonia(temp, days, pH, total_mM, material_label, initial_eggs=40):
+    """Urine/urea/ash amendment — ammonia (uncharged NH3) inactivation.
+
+    Requires a MEASURED total ammoniacal-N dose (mM). pH alone cannot stand in for it:
+    lime or ash can push pH ≥9 while adding little or no nitrogen, so a pH-only screen
+    would falsely clear a batch with essentially no ammonia. Without a dose → UNKNOWN.
+    """
+    if total_mM is None:
+        return _v("UNKNOWN",
+                  "Ammonia inactivation is driven by the actual ammonia DOSE, which pH alone cannot "
+                  "confirm — ash/lime can raise pH while adding little or no nitrogen.",
+                  "Measure total ammoniacal-N (NH3+NH4⁺) with an ammonia test strip/kit (mg/L ÷ 14 ≈ mM) "
+                  "and re-check with that value. Guide: hydrolysed urine / urea dosing reaches ~150–300 mM; "
+                  "lime-only reads near zero.")
     if pH < 8.5:
         return _v("UNKNOWN", f"pH {pH} is too low for meaningful ammonia sanitisation.",
-                  "Add more urine/urea or ash/lime to reach pH ≥9 (hydrolysed urine self-rises to ~9), "
-                  "then re-check.")
+                  "Add more urine/urea (adds nitrogen AND raises pH) to reach pH ≥9 (hydrolysed urine "
+                  "self-rises to ~9), then re-check.")
     f, _ = D.nh3_fraction(pH, min(temp, 34.0))
     nh3 = min(f * total_mM, 250.0)                 # calibration-bounded (Nordin/Fidjeland saturate)
     k = D.k_ammonia(AM, min(temp, 34.0), nh3)
     if k <= 0:
-        return _v("UNKNOWN", f"Estimated uncharged NH3 (~{nh3:.0f} mM) is below the ~{AM['threshold_mM']} mM "
-                  "threshold where ammonia inactivation works.",
+        return _v("UNKNOWN", f"At your measured {total_mM:.0f} mM total ammoniacal-N and pH {pH}, uncharged "
+                  f"NH3 (~{nh3:.0f} mM) is below the ~{AM['threshold_mM']} mM threshold where ammonia "
+                  "inactivation works.",
                   "Increase the urine/urea dose or pH; warmer material also raises the active fraction.")
     need_log = math.log10(initial_eggs / TARGET_EGG)
     cure = max(need_log / k, 2.0 / k)              # lag/robustness guard
     if days >= cure:
         return _v("SAFE_SCREEN",
-                  f"Ammonia dose at pH {pH}, {temp}°C clears Ascaris in ~{cure:.0f} d; you held {days}.",
+                  f"At your measured {total_mM:.0f} mM dose, pH {pH}, {temp}°C, ammonia clears Ascaris in "
+                  f"~{cure:.0f} d; you held {days}.",
                   None,
-                  f"NH3(aq) ≈ {nh3:.0f} mM, k ≈ {k:.3f} log/d.  ⚠ assumes a typical dose "
-                  f"(~{total_mM:.0f} mM total ammoniacal-N) — measure yours to confirm.")
+                  f"NH3(aq) ≈ {nh3:.0f} mM, k ≈ {k:.3f} log/d (from your {total_mM:.0f} mM total ammoniacal-N).")
     return _v("UNSAFE",
-              f"Ammonia dose at pH {pH}, {temp}°C needs ~{cure:.0f} d to clear Ascaris; you held {days}.",
+              f"At your measured {total_mM:.0f} mM dose, pH {pH}, {temp}°C, ammonia needs ~{cure:.0f} d to "
+              f"clear Ascaris; you held {days}.",
               f"Hold the batch ≥ {cure:.0f} days (sealed, to retain ammonia), or add more urine/urea to "
               f"raise the dose, or warm it.",
-              f"NH3(aq) ≈ {nh3:.0f} mM, k ≈ {k:.3f} log/d (assumes ~{total_mM:.0f} mM total — measure yours).")
+              f"NH3(aq) ≈ {nh3:.0f} mM, k ≈ {k:.3f} log/d (from your {total_mM:.0f} mM total ammoniacal-N).")
 
 def screen_thermal(temp, days):
     """Thermophilic composting / heat — US EPA 40 CFR 503 time–temperature law (≥50°C)."""
@@ -96,7 +121,7 @@ def screen_thermal(temp, days):
                   "mesophilic (40–50°C) helminth time–temperature curve in the evidence.",
                   "Either reach and hold ≥50°C uniformly (turned pile), or treat it as ambient storage "
                   "(store for the full categorical time) / ammonia amendment instead.")
-    req = 1.317e8 / 10 ** (0.14 * temp)            # EPA required days at T
+    req = D.epa_thermal_days(DATA, temp)           # EPA required days at T (shared engine fn)
     if days >= req:
         return _v("SAFE_SCREEN",
                   f"Holding ≥{temp}°C for {days} d meets the EPA time–temperature requirement (~{req:.1f} d).",
@@ -134,6 +159,14 @@ def assess_urine(treatment, params, route):
     need = 6 if route == "food_raw" else (1 if route == "food_processed" else 0)
     label = {6: "≥6 months (all crops)", 1: "≥1 month (processed crops only)",
              0: "own-household / non-food use (no storage needed)"}[need]
+    # WHO urine-storage times are anchored to ~20°C; colder storage is materially slower and
+    # these times are not validated there. Don't credit a cold store as if it were 20°C.
+    if need > 0 and temp < 20:
+        return _v("UNKNOWN",
+                  f"WHO urine-storage times ({label}) assume ~20°C; at {temp}°C inactivation is slower and "
+                  f"these times are not validated.",
+                  "Store at ~20°C or warmer for the required months, or extend the time and verify by "
+                  "measurement, or restrict to processed / non-food / own-household use.")
     if months >= need:
         return _v("SAFE_SCREEN", f"Urine stored {months} mo at ~{temp}°C meets WHO guidance for this route "
                   f"({label}).", None, "Urine's pathogen risk is low; storage clears it. Keep it OUT of "
@@ -253,7 +286,14 @@ def interactive():
         if treatment == "storage":
             params = (num("Temperature (°C)?"), num("Stored how many DAYS?", int))
         elif treatment == "ammonia":
-            params = (num("Temperature (°C)?"), num("Held how many DAYS?", int), num("Approx pH?"))
+            temp = num("Temperature (°C)?"); days = num("Held how many DAYS?", int); pH = num("Approx pH?")
+            if ask("\nHave you MEASURED the ammonia dose (total ammoniacal-N)?", {
+                    "yes": "yes — I have a strip/lab reading",
+                    "no":  "no — only pH, or it's just lime/ash"}) == "yes":
+                dose = num("Total ammoniacal-N in mM? (mg/L ÷ 14 ≈ mM)")
+            else:
+                dose = None                         # pH alone can't confirm a dose → UNKNOWN
+            params = (temp, days, pH, dose)
         elif treatment == "thermal":
             params = (num("Temperature held (°C)?"), num("For how many DAYS?", int))
         else:
@@ -264,7 +304,8 @@ def interactive():
 
 def demo():
     cases = [
-        ("A safe case (ammonia, held long enough)", "sludge", "ammonia", (30, 60, 9.1), "soil_only"),
+        ("A safe case (ammonia, MEASURED dose, held long enough)", "sludge", "ammonia", (30, 60, 9.1, 200), "soil_only"),
+        ("Lime raised pH but ammonia dose not measured", "sludge", "ammonia", (30, 60, 11.0, None), "soil_only"),
         ("The Malawi failure (6-mo passive storage)", "faeces", "storage", (25, 180), "food_raw"),
         ("Untreated — never", "sludge", "none", None, "food_processed"),
         ("Hot compost, too short", "sludge", "thermal", (52, 3), "non_food"),

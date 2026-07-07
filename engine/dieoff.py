@@ -87,6 +87,15 @@ def ascaris_rule(org, temp, days):
                     "effect": band["effect"], "meets": ok}
     return None
 
+def epa_thermal_days(data, temp, solids="high"):
+    """US EPA 40 CFR 503 required hold (days) at `temp` for Class-A helminth reduction.
+    The SINGLE engine home of the time–temperature constant — the guardrail
+    (safe_reuse.screen_thermal) and the anchor test both call this, so the constant
+    can't be silently changed without moving the tested value."""
+    tm = data["organisms"]["ascaris"]["thermal_model"]
+    const = tm["solids_lt_7pct_constant"] if solids == "low" else 1.317e8
+    return const / 10 ** (0.14 * temp)
+
 # ---- commands --------------------------------------------------------------
 def cmd_predict(data, organism, matrix, days, temp, initial):
     org = data["organisms"].get(organism)
@@ -232,7 +241,7 @@ def cmd_thermal(data, temp, days, solids):
               f" studies; temperature weakly predictive of decay < ~50°C), so no number is invented.")
         print(f"  → verify by measurement, or use the ammonia route (dieoff.py ammonia) which IS quantified here.")
         return
-    D = const / 10 ** (0.14 * temp)
+    D = epa_thermal_days(data, temp, solids)
     print(f"  EPA 40 CFR 503 required hold: D = {const:.3g} / 10^(0.14·{temp}) = {D:.2f} days ({D*24:.1f} h)")
     if days >= D:
         print(f"  VERDICT: ✓ MEETS the time–temperature requirement ({days:.2f} d ≥ {D:.2f} d).")

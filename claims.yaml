@@ -25,18 +25,22 @@ environment:
 claims:
   - id: suite
     statement: >-
-      The full public test suite — 64 tests over the dataset, corroboration engine, die-off model,
-      technology selector, and safety guardrail — reproduces green.
+      The full public test suite — 68 tests over the dataset, corroboration engine, die-off model,
+      technology selector, and safety guardrail (including regression tests pinning every defect the
+      self-audit caught) — reproduces green.
     reproduce: "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q"
     expect:
       exit_code: 0
-      stdout_contains: "64 passed"
+      stdout_contains: "68 passed"
 
   - id: no_naked_numbers
     statement: >-
-      No naked numbers: every quantitative safety value in the dataset carries a source citation —
-      the engine refuses to hold a number it cannot attribute.
-    reproduce: "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q tests/test_data.py::test_no_naked_numbers"
+      No naked numbers: every quantitative value in the reuse-safety table AND in the die-off
+      kinetics carries a source citation — the engine refuses to hold a number it cannot attribute.
+    reproduce: >-
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q
+      tests/test_data.py::test_no_naked_numbers
+      tests/test_dieoff.py::test_kinetics_constants_are_sourced
     expect: { exit_code: 0 }
 
   - id: sources_resolve
@@ -73,9 +77,10 @@ claims:
 
   - id: malawi_field_contradiction
     statement: >-
-      Faced with the real Malawi case — short passive storage that a design target would call
-      sufficient — the guardrail returns UNSAFE, siding with the conservative field evidence over the
-      optimistic design target.
+      The guardrail returns UNSAFE for the real Malawi failure case (6-month passive storage at
+      25°C) — below the WHO categorical rule of ~1 year at that temperature — rather than shipping
+      the shorter guidance as safe; the field study (Kumwenda 2019) that recorded the failure is
+      cited in the fix as why the bound is a floor.
     reproduce: "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q tests/test_safe_reuse.py::test_malawi_case_short_passive_storage_is_unsafe"
     expect: { exit_code: 0 }
 
@@ -95,8 +100,10 @@ claims:
 
   - id: dieoff_reproduces_anchors
     statement: >-
-      The first-order die-off model reproduces published anchor points — the Nordin/Vinnerås
-      ammonia-inactivation data for Ascaris and the US EPA 503 thermal time-temperature points.
+      The die-off model reproduces its published anchors: the engine's ammonia rate matches the
+      Nordin-2009 t99 inactivation points for Ascaris (within 30%), and the engine's EPA-503 thermal
+      law (called directly, not restated in the test) lands consistent with INDEPENDENT observations
+      — more conservative than WHO's ">1 week" at 50°C, and inside Haug's 1–2 d band at 55–60°C.
     reproduce: >-
       PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q
       tests/test_dieoff.py::test_ammonia_model_reproduces_nordin_anchors

@@ -92,7 +92,7 @@ organisms:
       source: {ref: epa503, locator: "40 CFR 503.32(a)(3)"}
       cross_check:                        # sourced points this regulatory curve is consistent with
         - {temp_C: 50, epa_days: 13.2, who: ">1 week", source: {ref: who2006_vol4, page: 89}}
-        - {temp_C: 57, epa_days: 1.1,  who: "55–60 °C → 1–2 d (Haug 1993)", source: {ref: who2006_vol4, page: 84}}
+        - {temp_C: 57, epa_days: 1.38, who: "Haug 1993 55–60 °C → 1–2 d brackets this", source: {ref: who2006_vol4, page: 84}}
 
   salmonella:
     name: "Salmonella (bacterial pathogen)"

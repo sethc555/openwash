@@ -77,7 +77,32 @@ the economics *worse*, not better, which is why it's in this ledger.
 
 ---
 
-## 3. What still holds (and what remains excluded — honestly)
+## 3. Round 2 — the audit turned on the guardrail and the attestation itself (2026-07-06)
+
+After the attestation shipped, four independent adversarial auditors (safety-data/corroboration,
+die-off/guardrail, claims-vs-tests meta-audit, numbers-consistency) re-attacked the *live* repo.
+Every finding below was **hand-verified before it was fixed**, and each fix is pinned by a new
+regression test (suite 64 → **68**). This round found a genuine operator-facing false-safe and one
+attested claim that was partly hollow — exactly the things the tool exists to refuse.
+
+| # | Defect (verified) | Failure it caused | Fix |
+|---|---|---|---|
+| **HIGH** | **Ammonia false-safe.** `screen_ammonia` inferred NH₃ from **pH alone**, hard-coding a 200 mM dose. | An operator following the tool's own "add ash/lime to pH ≥9" advice with **lime (zero nitrogen)** got **SAFE_SCREEN** with essentially no ammonia present. | Require a **measured** total ammoniacal-N; without it → **UNKNOWN** ("measure your dose — pH can't confirm it"). |
+| **HIGH** | **Attestation theater.** The `dieoff_reproduces_anchors` thermal test recomputed the EPA-503 formula *inline* and asserted it equalled its own output — it **never called the engine**. | Deleting the engine's thermal constant left the test green: "reproduces published anchors" was, for the thermal half, a tautology. | New single engine home `dieoff.epa_thermal_days()` (used by guardrail + test); test now calls it and checks against **independent** WHO (">1 wk") and Haug (1–2 d) points. Claim prose narrowed; the non-existent "Vinnerås" source dropped. |
+| **HIGH** | **README economics contradicted this very file.** Quoted a **"~$2/HH/mo"** fee (the retracted $1.95; honest floor is **$6.22**), an unsupported **"18% fuel"** figure, and misdescribed the over-claim as *fuel 40–60%→18%* (real: *nitrogen 40–70%→<5%*). | The public pitch published numbers the project's own audit had withdrawn. | README rewritten to match §2 exactly. |
+| **MED** | **Storage screen less conservative than its own model.** `screen_storage` returned SAFE on the WHO rule-floor even where the first-order model left **>1 egg/g** (30 °C / 365 d → residual ~1.17). | A false-safe by the system's *own* conservative-signal rule, at the band boundary. | SAFE now requires the rule **and** the model to agree; if the model residual > target, the conservative signal governs → UNSAFE. |
+| **MED** | **Urine screen ignored temperature.** WHO storage times (~20 °C) were applied to any temperature. | A **4 °C** urine store on a raw-crop route read the same **SAFE** as 20 °C. | Below ~20 °C on a stored route → **UNKNOWN** ("these times assume ~20 °C"). |
+| **MED** | **Corroboration `restates` latent bug.** A restatement *added* its target lineage to the independent set, phantom-crediting a lineage even when no primary of it was cited. | Could bless a false `multi_corroborated` (not yet triggered — worked only by luck of the data). | Independence now comes from **primaries only**; an echo can never manufacture a new lineage. |
+| **MED** | **Corroboration audit scope gap.** The tier over-claim check ran only on top-level `value` blocks. | `target_vs_field` / `contested` blocks carrying a hand-typed `claimed_tier` escaped the "computed, not trusted" guarantee — ~⅓ of claim shapes. | Audit now covers **every** `claimed_tier`-bearing block. |
+| **LOW** | **Data error.** The 57 °C thermal cross-check recorded `epa_days: 1.1` (Haug's low end) where the EPA-503 formula gives **1.38**. | A mislabeled anchor (masked from the guardrail, which never uses it). | Corrected to 1.38; Haug's 1–2 d noted as the independent bracket. |
+| **scope** | **Claim scope over-reach.** `no_naked_numbers` said "the dataset" but tested only the reuse-safety table; the `malawi` claim's prose overstated the *mechanism* (the UNSAFE is the WHO categorical rule, not a field-over-target arbitration — the design target itself already calls 6 months insufficient). | Prose broader than the test. | Added `test_kinetics_constants_are_sourced` and extended the claim to the kinetics; rewrote the malawi statement to the true mechanism. |
+
+**Found but NOT "fixed" — because they are honest limitations, not bugs (recorded, not papered over):**
+- **Unmarked shared ancestry.** The 30 m water setback is `multi_corroborated` (Sphere + EAWAG, distinct lineages), but both may echo an older engineering convention the tracker can't see. The lineage engine catches **marked** echoes (`restates`), not unmarked common ancestry — so tier honesty still rests partly on annotation. This is the layer's real boundary: *honest by discipline, not fully by construction.*
+- **`field.tier` is editorial.** The `field` block's `field_corroborated` / `field_contradicted` is a label paired with `status:`, describing whether field evidence matched the design target — **not** a lineage-computed corroboration tier, and the engine does not claim to compute it.
+- **The binding number is single-sourced.** `t90_ascaris_faeces` (125 ± 30 d) is honestly labeled `single_sourced`; the meta-analytic refresh (Musaazi 2023) is already applied in the *ambient decay* path (a regression test pins that it's slower/more conservative than the old WHO value).
+
+## 4. What still holds (and what remains excluded — honestly)
 
 **Survives the audit, sharper for it:** treatment is a rounding error (~3–5% of opex); collection and
 demand and subsidy are the binding constraints; the safety substrate, the corroboration engine, and

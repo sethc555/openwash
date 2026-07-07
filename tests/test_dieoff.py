@@ -28,10 +28,26 @@ def test_ammonia_temperature_speeds_up():
     assert dieoff.k_ammonia(AM, 34, 200) > 4 * dieoff.k_ammonia(AM, 24, 200)
 
 def test_thermal_epa_matches_known_points():
-    D55 = 1.317e8 / 10 ** (0.14 * 55)
-    D50 = 1.317e8 / 10 ** (0.14 * 50)
-    assert abs(D55 - 2.63) < 0.1     # ~2.6 days at 55°C
-    assert abs(D50 - 13.17) < 0.2    # ~13 days at 50°C (more conservative than WHO's 1 week)
+    # Call the ENGINE (dieoff.epa_thermal_days), not a re-typed formula — so changing the
+    # engine's constant would move this test. Check against the INDEPENDENT cross-check
+    # points recorded (with sources) in the kinetics data (WHO/Haug), then the EPA-503 anchors.
+    xc = {p["temp_C"]: p for p in ASCARIS["thermal_model"]["cross_check"]}
+    for temp in (50, 57):
+        got, published = dieoff.epa_thermal_days(DATA, temp), xc[temp]["epa_days"]
+        assert abs(got - published) / published < 0.02, f"{temp}°C: engine {got:.2f} vs data {published}"
+    assert abs(dieoff.epa_thermal_days(DATA, 55) - 2.63) < 0.05   # EPA-503 anchor ~2.6 d at 55°C
+    # genuinely INDEPENDENT consistency checks (not the EPA formula restated):
+    assert dieoff.epa_thermal_days(DATA, 50) > 7.0               # more conservative than WHO ">1 week" (7 d)
+    assert 1.0 <= dieoff.epa_thermal_days(DATA, 57) <= 2.0       # within Haug 1993's 55–60°C → 1–2 d band
+
+def test_kinetics_constants_are_sourced():
+    # no naked numbers in the kinetics data either: every load-bearing constant/anchor carries a source.
+    asc = ASCARIS
+    assert asc["t90_days"]["faeces"]["source"]["ref"]
+    am = asc["ammonia_model"]
+    assert am["source"]["ref"] and all(a["source"]["ref"] for a in am["anchors_t99_days"])
+    tm = asc["thermal_model"]
+    assert tm["source"]["ref"] and all(p["source"]["ref"] for p in tm["cross_check"])
 
 def test_faeces_query_uses_matrix_correct_t90_not_liquid_rate():
     # Salmonella's Table-3.8 rates are for greywater; a faeces query must fall back to T90

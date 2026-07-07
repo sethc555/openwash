@@ -20,11 +20,25 @@ def test_long_enough_storage_passes_the_rule():
     assert status("faeces", "storage", (25, 400), "soil_only") == "SAFE_SCREEN"
 
 def test_ammonia_needs_enough_time():
-    assert status("sludge", "ammonia", (30, 5, 9.1), "soil_only") == "UNSAFE"     # too short
-    assert status("sludge", "ammonia", (30, 60, 9.1), "soil_only") == "SAFE_SCREEN"
+    # params: (temp, days, pH, measured total ammoniacal-N in mM)
+    assert status("sludge", "ammonia", (30, 5, 9.1, 200), "soil_only") == "UNSAFE"     # too short
+    assert status("sludge", "ammonia", (30, 60, 9.1, 200), "soil_only") == "SAFE_SCREEN"
 
 def test_ammonia_low_ph_is_unknown_not_safe():
-    assert status("sludge", "ammonia", (30, 60, 7.0), "soil_only") == "UNKNOWN"
+    assert status("sludge", "ammonia", (30, 60, 7.0, 200), "soil_only") == "UNKNOWN"
+
+def test_ammonia_without_measured_dose_is_unknown_not_safe():
+    # the false-safe fix: high pH alone (e.g. lime/ash, ~zero nitrogen) must NOT read SAFE.
+    assert status("sludge", "ammonia", (30, 60, 11.0, None), "soil_only") == "UNKNOWN"
+
+def test_storage_sides_with_the_conservative_model_at_the_rule_floor():
+    # 365 d at 30°C clears the WHO rule band, but the die-off model still leaves >1 egg/g
+    # (residual ~1.17): the conservative signal must govern → UNSAFE, not SAFE.
+    assert status("faeces", "storage", (30, 365), "soil_only") == "UNSAFE"
+
+def test_cold_urine_storage_is_unknown_not_safe():
+    # WHO urine-storage times assume ~20°C; a 4°C store on a raw-crop route must not read SAFE.
+    assert SR.assess("urine", "storage", (4, 6), "food_raw")["status"] == "UNKNOWN"
 
 def test_thermal_time_temperature_law():
     assert status("sludge", "thermal", (52, 3), "non_food") == "UNSAFE"           # EPA needs ~6.9 d

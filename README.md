@@ -147,16 +147,19 @@ exactly it. The full record, including the over-claims it caught in its own numb
   ammonia-sanitizing, ~90%-locally-fabricable system.
 - **The binding constraints are institutional/financial** — capital structure, O&M and
   local ownership, and demand.
-- **No product pathway self-funds it.** Nutrients have ~no market; fuel (briquettes) is
-  the only real demand and covers only ~18% of opex. **Safe excreta reuse is a subsidized
-  public good** — the fee can be driven to ~$2/HH/month, but public money is structurally
-  required (upfront capital grant, or ongoing operating subsidy). The honest question is
-  *who funds it*, not *how to make it pay for itself*.
+- **No product pathway self-funds it.** Nutrients have ~no market (recovered-nitrogen revenue
+  offsets **<5% of opex**); fuel briquettes are the one product with real demand, but even so no
+  pathway covers its cost. The honest break-even collection fee is **~$6/HH/month — and that is a
+  floor** (it omits household-container capex, customer acquisition, and bad debt). **Safe excreta
+  reuse is a subsidized public good** — public money is structurally required (upfront capital
+  grant, or ongoing operating subsidy). The honest question is *who funds it*, not *how to make it
+  pay for itself*.
 
 Crucially, the study ran on the same honesty discipline as the substrate and kept catching
-its **own** over-claims (a tuned +12 °C solar figure corrected to +4; a counterfactual
-credit booked as cash; 100% offtake assumed; "fuel covers 40–60%" that was really 18%) —
-recorded in [`research/reading/ADVERSARIAL_ECON.md`](research/reading/ADVERSARIAL_ECON.md).
+its **own** over-claims (a tuned +12 °C solar figure corrected to +4; nitrogen revenue over-claimed
+at 40–70% of opex, actually <5%; a counterfactual "urea-avoided" credit booked as cash; 100% offtake
+assumed) — recorded in [`research/reading/ADVERSARIAL_ECON.md`](research/reading/ADVERSARIAL_ECON.md)
+and [`AUDIT.md`](AUDIT.md).
 That is the point of the whole project applied to itself: refuse to launder an optimistic
 number into a promise. In safety that prevents disease; in economics it prevents a system
 built on a fantasy that can't be kept running.
@@ -169,7 +172,7 @@ data/            sources.yaml (24) · reuse_safety.yaml (42 claims) · dieoff_ki
 engine/          safe_reuse.py (the guardrail — usable check) · openwash.py (safety table)
                  · dieoff.py (die-off screen) · select.py (capability query) · systems.py (system chaining)
                  · costs.py (cost lookup) · watch.py (non-pathogen hazards)
-tests/           64 pytest checks — data integrity, corroboration, all 3 die-off regimes, capability
+tests/           68 pytest checks — data integrity, corroboration, all 3 die-off regimes, capability
                  query, system chaining, limitations, watch layer, safe-reuse guardrail + verification
                  plan (+ regressions). `python -m pytest tests/`
 research/

@@ -67,15 +67,19 @@ def value_blocks(claim):
 # ---- corroboration: the core logic ----------------------------------------
 def independent_lineages(value_block, sources):
     """Distinct INDEPENDENT lineages backing a value. A source that `restates`
-    another lineage collapses onto it and does not add independence."""
-    lineages = set()
+    another lineage is an ECHO — it reinforces that lineage but can NEVER manufacture
+    a new independent one, even when no primary of that lineage is separately cited.
+    (The old code did `lineages.add(s['restates'])`, which phantom-credited a lineage
+    whenever a restatement's primary was absent — a latent over-corroboration bug.)"""
+    primary, restated = set(), set()
     for s in value_block.get("sources", []):
         if s.get("restates"):
-            lineages.add(s["restates"])            # not independent — folds in
+            restated.add(s["restates"])            # an echo — not independent
         else:
-            lin = sources.get(s["ref"], {}).get("lineage", s["ref"])
-            lineages.add(lin)
-    return lineages
+            primary.add(sources.get(s["ref"], {}).get("lineage", s["ref"]))
+    # Independence comes only from primaries. Restatements stand in ONLY when a value is
+    # cited solely by echoes (rare edge) — and then they count as that one echoed lineage.
+    return primary or restated
 
 def computed_tier(value_block, sources):
     lin = independent_lineages(value_block, sources)
@@ -114,13 +118,19 @@ def validate(sources, data):
             vals = [cand["value"] for cand in c["contested"]["candidates"]]
             if len(set(map(str,vals))) < 2:
                 errs.append(f"{cid}: marked contested but candidates don't differ")
-        # tier audit (the interesting part)
-        if "value" in c:
-            claimed = c["value"].get("claimed_tier")
-            comp = computed_tier(c["value"], sources)
+        # tier audit (the interesting part) — computed vs claimed for EVERY block that
+        # carries a claimed_tier (value, design_target, contested candidates), not just
+        # the top-level `value`. The "tier is computed, not trusted" guarantee must cover
+        # target_vs_field and contested shapes too, or a third of claims escape it.
+        for label, vb in value_blocks(c):
+            claimed = vb.get("claimed_tier")
+            if not claimed:
+                continue
+            comp = computed_tier(vb, sources)
             if claimed == "multi_corroborated" and comp != "multi_corroborated":
-                warns.append(f"{cid}: claims '{claimed}' but only {comp} "
-                             f"(lineages: {sorted(independent_lineages(c['value'], sources))}) — OVER-CLAIM")
+                loc = cid if label == "value" else f"{cid}.{label}"
+                warns.append(f"{loc}: claims '{claimed}' but only {comp} "
+                             f"(lineages: {sorted(independent_lineages(vb, sources))}) — OVER-CLAIM")
     return errs, warns
 
 def cmd_validate(sources, data):
