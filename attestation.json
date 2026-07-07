@@ -1,33 +1,33 @@
 {
   "schema": "claimcheck/v0.1",
-  "manifest_sha256": "ea481ad7e3bfa1098de8971c149a5303952d1a56b76b9970040fd4ed7c522f9c",
+  "manifest_sha256": "d1d0be775ee33a0d09b73c50a1c559265b20f6549afb8a7fa059a63bfb05663b",
   "artifact": {
     "title": "OpenWASH \u2014 an open, provenance-tagged reuse-safety substrate and guardrail for excreta reuse",
     "author": "Seth Cope",
     "orcid": "0009-0000-5520-915X",
     "doi": "",
     "repo": "https://github.com/sethc555/openwash",
-    "commit": "516eb19e3b3fc9e9c61ed83c36aa7ecdecfceb09",
+    "commit": "785ef437fd04fc4fa708481928c761ff4f19a642",
     "working_tree_dirty": false
   },
   "verifier": {
     "name": "claimcheck",
     "version": "0.1.0"
   },
-  "verified_at": "2026-07-07T16:24:53.449743+00:00",
+  "verified_at": "2026-07-07T16:40:12.973874+00:00",
   "host": {
     "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
     "python": "3.12.3"
   },
-  "environment_hash": "sha256:67c825e9c3cbe39801dbaff3beac64121cf9fd5a2f6903dafdfd6db3d82caabf",
+  "environment_hash": "sha256:95a3f6d5d9c5196dc2ca2db3ea40b30343865cc316215bf42c0c15e96136033b",
   "results": [
     {
       "id": "suite",
       "status": "pass",
       "exit_code": 0,
-      "duration_s": 0.9,
+      "duration_s": 1.0,
       "detail": "",
-      "stdout_tail": "........................................................................ [ 90%]\n........                                                                 [100%]\n80 passed in 0.67s"
+      "stdout_tail": "........................................................................ [ 88%]\n.........                                                                [100%]\n81 passed in 0.79s"
     },
     {
       "id": "no_naked_numbers",
@@ -43,7 +43,7 @@
       "exit_code": 0,
       "duration_s": 0.3,
       "detail": "",
-      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.16s"
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.15s"
     },
     {
       "id": "overclaim_caught",
@@ -94,6 +94,14 @@
       "stdout_tail": ".                                                                        [100%]\n1 passed in 0.04s"
     },
     {
+      "id": "web_parity",
+      "status": "pass",
+      "exit_code": 0,
+      "duration_s": 0.2,
+      "detail": "",
+      "stdout_tail": "parity: 3149/3149 verdicts identical (Python \u2194 browser JS)\nconstants: JS matches data/dieoff_kinetics.yaml \u2713"
+    },
+    {
       "id": "dieoff_reproduces_anchors",
       "status": "pass",
       "exit_code": 0,
@@ -103,8 +111,8 @@
     }
   ],
   "summary": {
-    "passed": 10,
-    "total": 10,
+    "passed": 11,
+    "total": 11,
     "all_passed": true
   },
   "signature": null,
