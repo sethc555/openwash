@@ -7,14 +7,14 @@
     "orcid": "0009-0000-5520-915X",
     "doi": "",
     "repo": "https://github.com/sethc555/openwash",
-    "commit": "4f54b4d4a64c536c921bdb249ace82ef0218054f",
+    "commit": "fa093cb8597aa80cfbffc08e2cc7fd9321e03f2c",
     "working_tree_dirty": false
   },
   "verifier": {
     "name": "claimcheck",
     "version": "0.1.0"
   },
-  "verified_at": "2026-07-07T19:27:10.803870+00:00",
+  "verified_at": "2026-07-07T19:27:14.263214+00:00",
   "host": {
     "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
     "python": "3.12.3"
@@ -43,7 +43,7 @@
       "exit_code": 0,
       "duration_s": 0.3,
       "detail": "",
-      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.13s"
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.14s"
     },
     {
       "id": "overclaim_caught",
@@ -59,7 +59,7 @@
       "exit_code": 0,
       "duration_s": 0.3,
       "detail": "",
-      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.14s"
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.13s"
     },
     {
       "id": "untreated_unsafe",
@@ -75,7 +75,7 @@
       "exit_code": 0,
       "duration_s": 0.2,
       "detail": "",
-      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.06s"
+      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.05s"
     },
     {
       "id": "unknown_not_a_guess",
