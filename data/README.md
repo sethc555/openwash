@@ -105,7 +105,7 @@ python engine/select.py  --preset flood_plain    # capability query (single-tech
 python engine/systems.py --preset flood_plain    # chain technologies into complete systems
 python engine/costs.py   --list                  # sourced (partial, context-specific) cost anchors
 
-python -m pytest tests/                           # 80 checks — run from repo root
+python -m pytest tests/                           # 81 checks — run from repo root
 ```
 `costs.yaml` holds sourced cost anchors (Münch 2007, Lusaka) with full place/year/currency/scope
 context — a lookup, not a ranking (cost doesn't generalize). `tests/` guards every invariant above.

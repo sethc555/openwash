@@ -100,6 +100,27 @@
   .verdict .why b{color:var(--ink)}
   .v-safe{--st:var(--safe)} .v-unsafe{--st:var(--unsafe)} .v-unknown{--st:var(--unknown)}
 
+  .tool{border:1px solid var(--line); border-radius:9px; background:var(--paper-2); padding:22px; margin-top:26px}
+  .tool .row{display:flex; flex-wrap:wrap; gap:14px; margin-bottom:14px}
+  .tool .field{flex:1 1 160px; min-width:150px; display:flex; flex-direction:column; gap:5px}
+  .tool label{font-family:var(--mono); font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft)}
+  .tool select,.tool input{font-family:var(--serif); font-size:16px; color:var(--ink); background:var(--paper);
+    border:1px solid var(--line-strong); border-radius:6px; padding:9px 11px; width:100%}
+  .tool select:focus,.tool input:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent)}
+  .tool .go{font-family:var(--mono); font-size:14px; font-weight:600; letter-spacing:.02em; cursor:pointer;
+    background:var(--accent); color:var(--paper); border:0; border-radius:6px; padding:12px 24px; margin-top:2px}
+  .tool .go:hover{filter:brightness(1.08)}
+  .tool .hint{font-family:var(--mono); font-size:10.5px; color:var(--ink-soft); margin-top:4px; line-height:1.45}
+  #result{margin-top:20px}
+  #result .verdict .fix{margin:11px 0 0; font-size:.98rem}
+  #result .verdict .fix b{color:var(--ink)}
+  #result .verdict .detail{font-family:var(--mono); font-size:12px; color:var(--ink-soft); margin-top:11px; line-height:1.55}
+  #result .plan{margin-top:15px; border-top:1px solid var(--line); padding-top:13px}
+  #result .plan h4{font-family:var(--mono); font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 9px}
+  #result .step{font-size:.93rem; margin:0 0 10px} #result .step b{font-family:var(--mono); font-size:11.5px; color:var(--ink)}
+  #result .step .how{color:var(--ink-soft); font-size:.89rem}
+  .tool .always{font-size:.84rem; color:var(--ink-soft); margin-top:16px; border-top:1px dashed var(--line); padding-top:12px}
+
   .callout{
     border-left:3px solid var(--accent); padding:2px 0 2px 20px; margin:26px 0;
     color:var(--ink); font-size:1.06rem;
@@ -210,6 +231,52 @@
     </div>
   </section>
 
+  <section id="try">
+    <div class="wrap">
+      <div class="eyebrow">Try it — no install</div>
+      <h2>Check your own reuse design.</h2>
+      <p>Answer a few plain questions and get a verdict, the reason, the specific fix, and — if it passes — how to confirm it on a real batch. <strong>The same rules as the engine</strong>: this page is checked against the Python tool on 3,000+ designs. A screen, not a certificate — verify by measurement before reuse.</p>
+      <div class="tool">
+        <div class="row">
+          <div class="field">
+            <label for="f-material">What are you reusing?</label>
+            <select id="f-material">
+              <option value="faeces">Faeces / dried faeces</option>
+              <option value="sludge">Faecal sludge (pit / tank / container)</option>
+              <option value="mixed">Mixed blackwater solids (settled)</option>
+              <option value="compost">Compost / material you believe is treated</option>
+              <option value="urine">Urine (kept separate)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-route">Where is it going?</label>
+            <select id="f-route">
+              <option value="food_raw">Crops eaten raw (salad, veg)</option>
+              <option value="food_processed">Crops that are cooked / processed</option>
+              <option value="non_food">Non-food crops (fodder, trees, fibre)</option>
+              <option value="soil_only">Soil, no crop</option>
+            </select>
+          </div>
+        </div>
+        <div class="row" id="f-treatment-row">
+          <div class="field">
+            <label for="f-treatment">How was it treated?</label>
+            <select id="f-treatment">
+              <option value="storage">Stored / aged (time + temperature)</option>
+              <option value="ammonia">Urine / urea / ash added (raises pH — ammonia)</option>
+              <option value="thermal">Heat / hot composting (≥50&nbsp;°C)</option>
+              <option value="none">Not treated</option>
+            </select>
+          </div>
+        </div>
+        <div class="row" id="f-inputs"></div>
+        <button class="go" id="f-go" type="button">Check</button>
+        <div id="result" aria-live="polite"></div>
+        <div class="always"><b>Always true.</b> This is a SCREEN, not a safety certificate — the batch still needs testing before reuse. It says <b>nothing</b> about chemical hazards (antibiotic resistance, heavy metals, pharmaceuticals). And it is not medical advice.</div>
+      </div>
+    </div>
+  </section>
+
   <section>
     <div class="wrap">
       <div class="eyebrow">The moat</div>
@@ -287,6 +354,89 @@
     var b=document.getElementById('tt');
     function cur(){var e=document.documentElement.getAttribute('data-theme');if(e)return e;return matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';}
     b.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);b.textContent=n==='dark'?'light':'dark';});
+  })();
+</script>
+
+<script src="guardrail.js"></script>
+<script>
+  (function(){
+    var $ = function(id){ return document.getElementById(id); };
+    var mat = $('f-material'), route = $('f-route'), treat = $('f-treatment'),
+        trow = $('f-treatment-row'), inputs = $('f-inputs'), result = $('result');
+
+    function num(id, label, val, hint){
+      return '<div class="field"><label for="'+id+'">'+label+'</label>' +
+             '<input id="'+id+'" type="number" inputmode="decimal" value="'+val+'">' +
+             (hint ? '<div class="hint">'+hint+'</div>' : '') + '</div>';
+    }
+    // build the numeric fields for the current material + treatment
+    function renderInputs(){
+      var m = mat.value, t = treat.value, h = '';
+      trow.style.display = (m === 'urine') ? 'none' : 'flex';
+      if (m === 'urine'){
+        h = num('i-temp','Storage temperature (°C)',20) + num('i-months','Stored how many MONTHS?',6);
+      } else if (t === 'storage'){
+        h = num('i-temp','Temperature (°C)',25) + num('i-days','Stored how many DAYS?',180);
+      } else if (t === 'ammonia'){
+        h = num('i-temp','Temperature (°C)',30) + num('i-days','Held how many DAYS?',60) +
+            num('i-ph','Approx pH',9.1) +
+            '<div class="field"><label for="i-measured">Measured the ammonia dose?</label>' +
+            '<select id="i-measured"><option value="no">No — only pH / it’s lime or ash</option>' +
+            '<option value="yes">Yes — I have a strip/lab reading</option></select>' +
+            '<div class="hint">pH alone can’t confirm ammonia — lime raises pH but adds no nitrogen.</div></div>' +
+            '<div class="field" id="i-dose-wrap" style="display:none">' +
+            '<label for="i-dose">Total ammoniacal-N (mM)</label>' +
+            '<input id="i-dose" type="number" inputmode="decimal" value="200">' +
+            '<div class="hint">mg/L ÷ 14 ≈ mM. Hydrolysed urine/urea ≈ 150–300 mM.</div></div>';
+      } else if (t === 'thermal'){
+        h = num('i-temp','Temperature held (°C)',55) + num('i-days','For how many DAYS?',10);
+      } else { // none
+        h = '<div class="hint" style="flex:1 1 100%">Untreated excreta is a disease vector — no numbers needed.</div>';
+      }
+      inputs.innerHTML = h;
+      var meas = $('i-measured');
+      if (meas) meas.addEventListener('change', function(){
+        $('i-dose-wrap').style.display = (meas.value === 'yes') ? 'flex' : 'none';
+      });
+    }
+
+    var BADGE = { SAFE_SCREEN:['SAFE — by screen','v-safe'], UNSAFE:['UNSAFE','v-unsafe'],
+                  UNKNOWN:['NOT ENOUGH EVIDENCE','v-unknown'] };
+    function esc(s){ return String(s).replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); }
+    function val(id){ var e=$(id); return e ? parseFloat(e.value) : null; }
+
+    function run(){
+      var m = mat.value, t = (m === 'urine') ? 'storage' : treat.value, r = route.value, params;
+      if (m === 'urine') params = [val('i-temp'), val('i-months')];
+      else if (t === 'storage' || t === 'thermal') params = [val('i-temp'), val('i-days')];
+      else if (t === 'ammonia'){
+        var dose = ($('i-measured') && $('i-measured').value === 'yes') ? val('i-dose') : null;
+        params = [val('i-temp'), val('i-days'), val('i-ph'), dose];
+      } else params = null;
+
+      var v = OpenWASH.assess(m, t, params, r);
+      var b = BADGE[v.status] || ['—','v-unknown'];
+      var html = '<div class="verdict '+b[1]+'"><div class="tag">'+b[0]+'</div>' +
+                 '<p class="why">'+esc(v.reason)+'</p>';
+      if (v.fix)    html += '<p class="fix"><b>Do this:</b> '+esc(v.fix)+'</p>';
+      if (v.detail) html += '<div class="detail">'+esc(v.detail)+'</div>';
+      if (v.status === 'SAFE_SCREEN'){
+        var plan = OpenWASH.verification_plan(m, t, params, r);
+        html += '<div class="plan"><h4>Now confirm it on the real batch — cheap to hard</h4>';
+        plan.forEach(function(s){
+          html += '<p class="step"><b>'+esc(s[0])+'</b> — '+esc(s[1])+
+                  '<br><span class="how">how: '+esc(s[2])+' · '+esc(s[3])+'</span></p>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+      result.innerHTML = html;
+    }
+
+    mat.addEventListener('change', function(){ renderInputs(); result.innerHTML=''; });
+    treat.addEventListener('change', function(){ renderInputs(); result.innerHTML=''; });
+    $('f-go').addEventListener('click', run);
+    renderInputs();
   })();
 </script>
 </body>

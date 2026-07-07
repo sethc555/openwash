@@ -116,7 +116,16 @@ recommendation* spanning onsite and offsite, not just a valid system.
 ## The guardrail — the substrate, made usable
 
 The safety layer above is powerful but developer-facing. [`engine/safe_reuse.py`](engine/safe_reuse.py)
-wraps it into a check a non-expert can run at the point of decision:
+wraps it into a check a non-expert can run at the point of decision.
+
+**No install — run it in a browser:** **[the interactive guardrail](https://sethc555.github.io/openwash/#try)**
+(on the explainer page). Answer a few plain questions on a phone or laptop and get the verdict, the
+fix, and a batch-verification plan. It runs the *same rules* as the engine — [`docs/guardrail.js`](docs/guardrail.js)
+is a faithful port, and [`tests/parity.py`](tests/parity.py) checks it against the Python engine on
+3,000+ designs on every commit (the `web_parity` attested claim), so it can never drift into a second,
+unattested source of truth.
+
+**Or from a terminal:**
 
 ```
 python engine/safe_reuse.py            # answer a few plain questions, get a verdict
@@ -172,14 +181,16 @@ data/            sources.yaml (23) · reuse_safety.yaml (42 claims) · dieoff_ki
 engine/          safe_reuse.py (the guardrail — usable check) · openwash.py (safety table)
                  · dieoff.py (die-off screen) · select.py (capability query) · systems.py (system chaining)
                  · costs.py (cost lookup) · watch.py (non-pathogen hazards)
-tests/           80 pytest checks — data integrity, corroboration, all 3 die-off regimes, capability
+tests/           81 pytest checks — data integrity, corroboration, all 3 die-off regimes, capability
                  query, system chaining, limitations, watch layer, safe-reuse guardrail + verification
                  plan (+ regressions). `python -m pytest tests/`
+docs/            index.html (the explainer + the no-install interactive guardrail)
+                 · guardrail.js (the browser port, parity-checked against the engine)
 research/
   reading/   SYNTHESIS (the evidence trail) · ADVERSARIAL (151-paper refutation scan)
              · ADVERSARIAL_ECON (the techno-economic study + the over-claims it caught)
-claims.yaml      10 machine-verifiable claims — each reproduces iff it holds
-attestation.json the re-runnable result of verifying them (10/10)
+claims.yaml      11 machine-verifiable claims — each reproduces iff it holds
+attestation.json the re-runnable result of verifying them (11/11)
 AUDIT.md         the honesty ledger — every over-claim caught, retracted, and pinned
 ```
 
@@ -190,12 +201,13 @@ AUDIT.md         the honesty ledger — every over-claim caught, retracted, and 
 
 ## Reproducible claims
 
-The project applies its own honesty discipline to itself. Ten load-bearing claims — that the engine
+The project applies its own honesty discipline to itself. Eleven load-bearing claims — that the engine
 refuses naked numbers, that it caught a real over-claim, that it flags the Malawi field
 contradiction as UNSAFE, that it says *"not enough evidence"* instead of guessing, that the die-off
-model reproduces its published anchors — are declared in [`claims.yaml`](claims.yaml), each with a
+model reproduces its published anchors, and that the browser guardrail matches the Python engine on
+3,000+ designs — are declared in [`claims.yaml`](claims.yaml), each with a
 command that **exits 0 if and only if the claim holds**. [`attestation.json`](attestation.json)
-records the result (10/10). Trust is re-runnability, not our word — verify it yourself on a clean
+records the result (11/11). Trust is re-runnability, not our word — verify it yourself on a clean
 checkout:
 
 ```
