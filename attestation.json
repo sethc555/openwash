@@ -7,14 +7,14 @@
     "orcid": "0009-0000-5520-915X",
     "doi": "",
     "repo": "https://github.com/sethc555/openwash",
-    "commit": "f66a7a5d185345248dd7cd107392869f61226b27",
+    "commit": "fd051cf43c6c969b6ef47fb47d556e363fe73f14",
     "working_tree_dirty": false
   },
   "verifier": {
     "name": "claimcheck",
     "version": "0.1.0"
   },
-  "verified_at": "2026-07-07T19:42:48.119225+00:00",
+  "verified_at": "2026-07-07T19:42:52.569551+00:00",
   "host": {
     "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
     "python": "3.12.3"
@@ -27,7 +27,7 @@
       "exit_code": 0,
       "duration_s": 1.2,
       "detail": "",
-      "stdout_tail": "........................................................................ [ 82%]\n...............                                                          [100%]\n87 passed in 0.94s"
+      "stdout_tail": "........................................................................ [ 82%]\n...............                                                          [100%]\n87 passed in 0.98s"
     },
     {
       "id": "no_naked_numbers",
@@ -59,7 +59,7 @@
       "exit_code": 0,
       "duration_s": 0.4,
       "detail": "",
-      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.17s"
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.16s"
     },
     {
       "id": "untreated_unsafe",
