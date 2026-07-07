@@ -1,25 +1,25 @@
 {
   "schema": "claimcheck/v0.1",
-  "manifest_sha256": "973c327b277f7ea69fdea89af4397e4edc3b2b1df64ba93afdf8618873bac500",
+  "manifest_sha256": "a9530e776f73b920cbc7531c98791717d777d9cfc05d870f22298d2ba7665df4",
   "artifact": {
     "title": "OpenWASH \u2014 an open, provenance-tagged reuse-safety substrate and guardrail for excreta reuse",
     "author": "Seth Cope",
     "orcid": "0009-0000-5520-915X",
     "doi": "",
     "repo": "https://github.com/sethc555/openwash",
-    "commit": "ec0770b7d2a430d01fe47d753859ccf2f0bb7ad3",
+    "commit": "9434904fdabf2a55bab55583ccfdb347952819a5",
     "working_tree_dirty": false
   },
   "verifier": {
     "name": "claimcheck",
     "version": "0.1.0"
   },
-  "verified_at": "2026-07-07T03:12:38.241117+00:00",
+  "verified_at": "2026-07-07T06:14:45.698069+00:00",
   "host": {
     "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
     "python": "3.12.3"
   },
-  "environment_hash": "sha256:1ed1b9f67aa48c8f6d421f874f4a6f25238a98f9398071a48307e32ff723660e",
+  "environment_hash": "sha256:6c465c2de4e910d4866b6b0c5ce48531f509f24ceeb1af49bfd30a25a564f7b8",
   "results": [
     {
       "id": "suite",
@@ -27,7 +27,7 @@
       "exit_code": 0,
       "duration_s": 0.7,
       "detail": "",
-      "stdout_tail": "....................................................................     [100%]\n68 passed in 0.51s"
+      "stdout_tail": "........................................................................ [ 97%]\n..                                                                       [100%]\n74 passed in 0.55s"
     },
     {
       "id": "no_naked_numbers",
@@ -67,7 +67,7 @@
       "exit_code": 0,
       "duration_s": 0.2,
       "detail": "",
-      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.03s"
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.04s"
     },
     {
       "id": "malawi_field_contradiction",
@@ -91,7 +91,7 @@
       "exit_code": 0,
       "duration_s": 0.2,
       "detail": "",
-      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.03s"
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.04s"
     },
     {
       "id": "dieoff_reproduces_anchors",
@@ -99,7 +99,7 @@
       "exit_code": 0,
       "duration_s": 0.2,
       "detail": "",
-      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.03s"
+      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.04s"
     }
   ],
   "summary": {
