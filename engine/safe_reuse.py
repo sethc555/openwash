@@ -93,7 +93,7 @@ def screen_ammonia(temp, days, pH, total_mM, material_label, initial_eggs=40):
                   "Add more urine/urea (adds nitrogen AND raises pH) to reach pH ≥9 (hydrolysed urine "
                   "self-rises to ~9), then re-check.")
     f, _ = D.nh3_fraction(pH, min(temp, 34.0))
-    nh3 = min(f * total_mM, 250.0)                 # calibration-bounded (Nordin/Fidjeland saturate)
+    nh3 = min(f * total_mM, AM.get("nh3_saturation_mM", 250.0))   # calibration-bounded (data-sourced)
     k = D.k_ammonia(AM, min(temp, 34.0), nh3)
     if k <= 0:
         return _v("UNKNOWN", f"At your measured {total_mM:.0f} mM total ammoniacal-N and pH {pH}, uncharged "

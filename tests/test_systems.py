@@ -46,6 +46,15 @@ def test_arborloo_is_reuse_complete_score_one():
     assert arbor, "U.1 → Arborloo should be a valid system"
     assert systems.score(arbor[0], BYID) == 1
 
+def test_biomass_only_reuse_carries_a_chemical_watch_flag():
+    # round-4 fix: a biomass-only reuse endpoint (arborloo D.1) must not escape the chemical watch
+    # the way it once escaped the pathogen flag.
+    s = ["U.1", "D.1"]
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        systems.render(DATA, PRESETS["rural_ample_land"], s, 1, systems.score(s, BYID))
+    assert "non-pathogen watch" in buf.getvalue()
+
 def test_reuse_scores_better_than_disposal():
     reuse = systems.score(["U.1", "S.5", "D.4"], BYID)     # → compost application
     disposal = systems.score(["U.1", "S.2", "D.12"], BYID)  # → landfill

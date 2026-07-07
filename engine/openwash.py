@@ -166,8 +166,9 @@ def cmd_report(sources, data):
 
 def cmd_query(sources, data, use, crop=None, labour=None):
     print(f"CAPABILITY QUERY: use={use} crop={crop} labour={labour}\n")
-    # find matching log-reduction requirement
-    match = None
+    def _reqnum(v): return v["max"] if isinstance(v, dict) else v
+    # find matching log-reduction requirement(s)
+    matches = []
     for c in data["claims"]:
         if c["category"] != "log_reduction_requirement": continue
         sc = c.get("scenario", {})
@@ -175,19 +176,29 @@ def cmd_query(sources, data, use, crop=None, labour=None):
         if crop and sc.get("crop") and sc["crop"] != crop: continue
         if labour and sc.get("labour") and sc["labour"] != labour: continue
         if (crop and sc.get("crop")==crop) or (labour and sc.get("labour")==labour) or (not crop and not labour):
-            match = c; break
-    if not match:
+            matches.append(c)
+    if not matches:
         print("  no matching reduction requirement."); return
+    # under-specified scenario (e.g. no crop) → SIDE WITH THE MOST CONSERVATIVE requirement
+    match = max(matches, key=lambda c: _reqnum(c["value"]["value"]))
     req = match["value"]["value"]
-    print(f"  Required reduction: {req} log10")
+    reqn = _reqnum(req)
+    if len(matches) > 1:
+        print(f"  ({len(matches)} scenarios match; showing the MOST CONSERVATIVE — "
+              f"specify --crop/--labour to narrow)")
+    print(f"  Required reduction: {req} log10  (scenario: {match.get('scenario', {})})")
     for s in match["value"]["sources"]:
         print(f"    src: {cite(s, sources)}")
     print(f"    computed tier: {computed_tier(match['value'], sources)}\n")
-    print("  Barrier menu to reach it (each credit summed must total the requirement):")
+    print("  Barrier menu to reach it (credits summed must total ≥ the requirement):")
     for c in data["claims"]:
         if c["category"] == "barrier_credit":
             print(f"    - {c['parameter']:<52} {fmt_value_block(c['value'])}")
-    print("\n  Example valid combination (WHO Box 4.1 logic): treatment 4 + field die-off 1 + washing 1 = 6 log.")
+    print(f"\n  Multi-barrier logic (WHO Box 4.1): combine barriers so credits SUM to ≥ {reqn} log10.")
+    print(f"    illustrative — treatment (≤4) + field die-off (~1) + produce washing (1) reach 6 log;")
+    if reqn > 6:
+        print(f"    {reqn} log (this scenario) needs ONE MORE barrier (e.g. localized/drip irrigation, "
+              f"or added treatment) — a 6-log combination is NOT sufficient here.")
     print("  Verification: measure treated wastewater at <=1e3 E. coli/100 mL and <=1 helminth egg/L.")
 
 def cmd_siting(sources, data):

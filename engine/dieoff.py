@@ -155,7 +155,12 @@ def cmd_storage(data, temp, days, initial):
         print(f"  VERDICT: ⚠ NOT SCREENED OUT — model and rule both pass, but this is a "
               f"necessary-not-sufficient screen. Verify by measurement (<=1 egg/g); the field "
               f"caveat still applies. Do NOT treat as certified safe.")
+    elif rule_pass is None and model_pass:
+        # no WHO categorical band covers this temperature, but the model passes — advisory only
+        print(f"  VERDICT: ⚠ NOT SCREENED OUT by the model ({resid:.3g} ≤ {target} eggs/g), but NO WHO "
+              f"categorical rule covers {temp}°C, so this is ADVISORY — verify by measurement.")
     else:
+        # model residual exceeds the target (with or without a covering rule) → conservative UNSAFE
         print(f"  VERDICT: ✗ UNSAFE (screened out) — first-order model residual {resid:.3g} > {target} eggs/g.")
 
 # ---- ammonia-enhanced Ascaris inactivation (Nordin 2009 / Pecson 2007) -----
@@ -166,10 +171,13 @@ def nh3_fraction(pH, temp_C):
     return 1.0 / (1.0 + 10 ** (pKa - pH)), pKa
 
 def k_ammonia(am, temp_C, nh3_mM):
-    """Ascaris inactivation rate (log10/day) from uncharged NH3; 0 below threshold."""
+    """Ascaris inactivation rate (log10/day) from uncharged NH3; 0 below threshold.
+    The linear-in-NH3 rate is CLAMPED at the calibration ceiling (Nordin/Fidjeland saturate) so it
+    cannot over-predict inactivation at high doses — the single guard for every caller (CLI + guardrail)."""
     if nh3_mM < am["threshold_mM"]:
         return 0.0
-    return am["k_coeff_log10_per_day_per_mM"] * nh3_mM * am["Q10"] ** ((temp_C - 24) / 10.0)
+    nh3 = min(nh3_mM, am.get("nh3_saturation_mM", 250.0))
+    return am["k_coeff_log10_per_day_per_mM"] * nh3 * am["Q10"] ** ((temp_C - 24) / 10.0)
 
 def cmd_ammonia(data, temp, days, initial, nh3, ph, total_am, validate):
     am = data["organisms"]["ascaris"]["ammonia_model"]

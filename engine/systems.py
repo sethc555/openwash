@@ -103,6 +103,11 @@ def render(data, site, system, rank, sc):
     for i, hint in checks:
         print(f"       ⚑ {i} → {hint}")
     reuse_prods = {rp for i in techs for rp in byid[i].get("reuse_products", [])}
+    # biomass-only reuse endpoints (e.g. an arborloo) apply excreta/humus directly and thus carry the
+    # same excreta-borne chemical hazards as faecal reuse — flag them like dried faeces, or they'd
+    # silently escape the chemical watch the way they once escaped the pathogen screen.
+    if any(is_reuse(i) and not byid[i].get("reuse_products") for i in techs):
+        reuse_prods |= {"dried_faeces"}
     watch = sorted({h["name"].split(" (")[0] for h in WATCH if reuse_prods & set(h["applies_to_products"])})
     if watch:
         print(f"       ⚠ non-pathogen watch (not in the safety screen — see watch.py): {', '.join(watch)}")

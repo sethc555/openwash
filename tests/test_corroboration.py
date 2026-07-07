@@ -1,8 +1,19 @@
 """The corroboration engine — tier is computed from lineage, catching over-claims."""
+import io, contextlib
 import openwash
 
 SOURCES, DATA = openwash.load()
 BYID = {c["id"]: c for c in DATA["claims"]}
+
+def test_query_defaults_to_the_most_conservative_requirement():
+    # round-4 fix: an under-specified scenario (no crop) must pick the STRICTER requirement (root=7),
+    # never present a 6-log combination as sufficient for a 7-log need.
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        openwash.cmd_query(SOURCES, DATA, "unrestricted_irrigation")   # no crop
+    out = buf.getvalue()
+    assert "7 log10" in out and "MOST CONSERVATIVE" in out
+    assert "NOT sufficient here" in out          # never blesses a short combo for a 7-log need
 
 def test_overclaim_downgraded_to_single_lineage():
     # WHO Vol4+Vol2+SSP all cite the 6/7-log target, but share one lineage

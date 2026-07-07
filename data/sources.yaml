@@ -47,13 +47,6 @@ sources:
     license: "Open access w/ attribution"
     local: research/datasets/eawag_compendium/Compendium_Sanitation_Systems_2nd_Ed.pdf
 
-  cawst_bsf:
-    title: "Biosand Filter for Technicians — Construction Manual"
-    org: CAWST
-    year: 2012
-    lineage: cawst
-    license: "CAWST — non-commercial WASH use"
-    local: research/datasets/cawst/CAWST_BSF_for_Technicians_Construction_Manual_2012_en.pdf
 
   manga2020:
     title: "Fate of faecal pathogen indicators during faecal sludge composting with different bulking agents in tropical climate"

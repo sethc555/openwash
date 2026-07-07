@@ -25,13 +25,13 @@ environment:
 claims:
   - id: suite
     statement: >-
-      The full public test suite — 74 tests over the dataset, corroboration engine, die-off model,
+      The full public test suite — 77 tests over the dataset, corroboration engine, die-off model,
       technology selector, and safety guardrail (including regression tests pinning every defect the
       self-audit caught) — reproduces green.
     reproduce: "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q"
     expect:
       exit_code: 0
-      stdout_contains: "74 passed"
+      stdout_contains: "77 passed"
 
   - id: no_naked_numbers
     statement: >-

@@ -48,6 +48,9 @@ organisms:
       # NH3 fraction of total ammoniacal-N: f = 1/(1+10^(pKa-pH)); pKa temp-dependent (Emerson/Nordin):
       pKa_formula: "2729.92/T_kelvin + 0.09018"
       threshold_mM: 20               # below ~20 mM NH3(aq) the ammonia effect is negligible
+      nh3_saturation_mM: 250         # linear model is calibrated to <=250 mM; Nordin/Fidjeland
+                                     # SATURATE above this (440 mM ~ same kill as 250) — clamp, do
+                                     # not extrapolate, or the rate over-predicts inactivation.
       # first-order rate k (log10/day) = coeff · NH3_mM · Q10^((T−24)/10), CALIBRATED to
       # reproduce the four Nordin-2009 t99 anchor points below (coeff fit, not invented):
       k_coeff_log10_per_day_per_mM: 2.6e-4    # at 24 °C reference

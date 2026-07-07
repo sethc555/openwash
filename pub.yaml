@@ -31,6 +31,7 @@ keywords:
   - provenance
 doi: ""
 software_doi: ""
+version: "v0.2"                      # keep in sync with README status line + docs/index.html footer
 
 # per-repo overrides of the shared identity
 license:

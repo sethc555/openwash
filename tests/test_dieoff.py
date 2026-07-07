@@ -23,6 +23,14 @@ def test_ammonia_model_reproduces_nordin_anchors():
 def test_ammonia_below_threshold_is_zero():
     assert dieoff.k_ammonia(AM, 25, 10) == 0.0  # 10 mM < 20 mM threshold
 
+def test_ammonia_rate_is_clamped_at_calibration_ceiling():
+    # round-4 fix: the linear-in-NH3 rate must NOT over-predict above the ~250 mM calibration ceiling
+    # (Nordin/Fidjeland saturate). 440 mM and 300 mM must give the SAME rate as 250 mM.
+    assert dieoff.k_ammonia(AM, 34, 440) == dieoff.k_ammonia(AM, 34, 250)
+    assert dieoff.k_ammonia(AM, 34, 300) == dieoff.k_ammonia(AM, 34, 250)
+    # and the clamped 440 mM/34 °C rate must land near the independent Fidjeland t99 (6.4 d), not ~3 d
+    assert 5.0 < 2.0 / dieoff.k_ammonia(AM, 34, 440) < 8.0
+
 def test_ammonia_temperature_speeds_up():
     # 34°C should be markedly faster than 24°C at equal NH3
     assert dieoff.k_ammonia(AM, 34, 200) > 4 * dieoff.k_ammonia(AM, 24, 200)

@@ -114,7 +114,7 @@ handful of smaller issues:
 
 | # | Defect (verified) | Failure it caused | Fix |
 |---|---|---|---|
-| **HIGH** | **A reuse endpoint dropped its pathogen flag.** `systems.py` only attached the `⚑` pathogen screen to reuse products in `REUSE_HINT`; **biosolids** (land-applied sludge, D.5) wasn't in it, and **in-situ biomass** endpoints (an arborloo, D.1) have no reuse product at all. | Both were scored and labeled "reuse-complete" and got the *chemical* watch flag, but the **pathogen/helminth screen was silently dropped** on the exact land-application pathway that most needs it. | `biosolids` added to `REUSE_HINT`; the flag now fires on **every** reuse endpoint (a fallback covers biomass/arborloo). A test asserts no reuse endpoint across any preset escapes it. |
+| **HIGH** | **A reuse endpoint dropped its pathogen flag.** `systems.py` only attached the `⚑` pathogen screen to reuse products in `REUSE_HINT`; **biosolids** (land-applied sludge, D.5) wasn't in it, and **in-situ biomass** endpoints (an arborloo, D.1) have no reuse product at all. | Both were scored "reuse-complete"; biosolids even carried the *chemical* watch flag while its **pathogen screen was silently dropped**, and the arborloo escaped **both** screens (chemical-watch gap fixed later, in Round 4). | `biosolids` added to `REUSE_HINT`; the flag now fires on **every** reuse endpoint (a fallback covers biomass/arborloo). A test asserts no reuse endpoint across any preset escapes it. |
 | **MED** | **Fail-open on unknown site data.** The water-table and reuse-land gates only fired when the site *provided* the value; a missing value silently passed. | A custom site that omitted water-table depth got **deep pits cleared**; omitting land cleared reuse endpoints. | Fail-**closed**: unknown water-table → a deep pit is disqualified (`water_table_unknown`) pending the value; same for land/reuse-land. |
 | **MED** | **Watch layer skipped dried faeces.** `dried_faeces` wasn't in any hazard's product list. | Direct dried-faeces land reuse — a primary route for the gut resistome and drug residues — carried **no AMR/micropollutant flag**. | Added `dried_faeces` to the AMR and micropollutant hazards. |
 | **LOW** | **Round-2's data fix was incomplete.** `cmd_thermal` still printed a hardcoded `57 °C→1.1 d` labeled "(in kinetics data)" while the data now says 1.38 — the CLI misquoted its own source. | Cosmetic (not a guardrail value), but it made Round 2's "corrected to 1.38" slightly over-stated. | The cross-check line now reads from the data; the EPA-503 high-solids constant moved **into** the kinetics data as a sourced number (was hardcoded in two places) and is now audited by the "no naked numbers" kinetics test. |
@@ -126,7 +126,33 @@ advisory-only (no site-temperature field enforces it), and one cost row (S.7 vau
 whole-toilet figure — both disclosed, neither safety-gating. The **initial-load** assumption remains a
 guided-path simplification (now disclosed, not eliminated).
 
-## 5. What still holds (and what remains excluded — honestly)
+## 5. Round 4 — the CLI paths and the public explainer (2026-07-07)
+
+Rounds 1–3 hardened the core data, the guardrail, and the systems layer. Round 4 attacked the
+surfaces still untouched: the **`openwash.py` query/siting/field commands**, the **`dieoff.py` CLI**
+(as distinct from the `safe_reuse.py` guardrail that wraps it), and the **public `docs/index.html`
+explainer** for drift after three rounds of edits. Four auditors, findings hand-verified, each fix
+pinned by a regression test (suite 74 → **77**). This round found **three HIGH** — none in the core
+guardrail (which held), all in the secondary CLI/query/docs surfaces that had never been swept.
+
+| # | Defect (verified) | Failure it caused | Fix |
+|---|---|---|---|
+| **HIGH** | **`cmd_query` printed a fixed "= 6 log" example for every requirement.** A hardcoded "treatment 4 + field 1 + washing 1 = 6 log" line was printed verbatim even for a **7-log** requirement. | A user irrigating **root crops** (7-log) who followed the shown "valid combination" would **under-treat by 10×**. | The example now states the *actual* required total and, for >6-log scenarios, explicitly says a 6-log combination is **NOT sufficient** and one more barrier is needed. |
+| **HIGH** | **The `dieoff.py` ammonia CLI didn't clamp NH₃.** The guardrail (`safe_reuse.py`) capped the dose at the 250 mM calibration ceiling, but the raw `k_ammonia` rate — used directly by the CLI — did not, so it over-predicted inactivation at high doses. | `ammonia --nh3 440 --days 6` returned a **false pass** (model t99 ≈ 3 d) where the independent Fidjeland data says ~6.4 d → actually **UNSAFE**. | The clamp moved **into `k_ammonia`** (single guard for every caller), sourced from a new `nh3_saturation_mM` data field. 440 mM now clamps to 250 → t99 ≈ 6 d → correctly UNSAFE. |
+| **HIGH** | **The public explainer laundered an over-claim.** `docs/index.html` stamped the ≤1 egg/g threshold **"multi-corroborated"** — the exact `claimed_tier` the engine *catches and downgrades* to `single_lineage`, printed in the section that brags about catching over-claims. | The public face published the over-stated tier the whole project exists to refuse. | Corrected to "single lineage" (matching the engine's computed tier). |
+| **MED** | **`cmd_query` defaulted to the *least* conservative match.** With no `--crop`, it returned the first-in-file requirement (leaf, 6-log), ignoring root (7-log). | A user omitting crop and growing root crops was told 6 when the data says 7. | Under-specified scenarios now select the **most conservative** matching requirement. |
+| **MED** | **`cmd_storage` printed false arithmetic.** When no WHO band covered the temperature but the model passed, it printed "UNSAFE — residual X > 1.0" with X < 1.0. | Confusing (errs safe, but the printed statement was arithmetically wrong). | Split out: no-band + model-pass → an honest "advisory — verify by measurement," not a false UNSAFE. |
+| **MED** | **Version disagreement.** `CITATION.cff` said `v1.0.0` (a pubkit template default) while README/site said `v0.2`. | A citer would record a 1.0 release the project calls v0.2. | Taught pubkit to read `version` from `pub.yaml`; set `v0.2`; regenerated CITATION.cff. |
+| **LOW** | Docs ammonia card showed pH-only inputs that now return UNKNOWN; biomass-only reuse (arborloo) escaped the *chemical* watch; a dead-weight orphan source (`cawst_bsf`, an uncited biosand-filter manual) implied coverage that didn't exist; the round-3 AUDIT prose overstated the arborloo's chemical coverage. | Cosmetic / advisory-layer gaps and a stale count. | Card now shows a measured dose; the chemical watch covers biomass endpoints; `cawst_bsf` removed (24 → 23 sources); this ledger's Round-3 row corrected. |
+
+**Recorded, not "fixed":** two prose-only source mentions (`pecson2007` mechanism, `manga2023`) carry
+unique lineages that are never *computed* into a tier — the intended independent corroboration of the
+ammonia mechanism isn't wired into the machinery (disclosed, not load-bearing). A meta `t99_days: 429`
+label is not self-consistent with `2/k` under the log-linear model (independently-reported medians; the
+engine uses `k`, not that label). Unbounded extrapolation in `predict` still reports absurd
+log-reductions (flagged `LOW (extrapolation)`, conservative in direction).
+
+## 6. What still holds (and what remains excluded — honestly)
 
 **Survives the audit, sharper for it:** treatment is a rounding error (~3–5% of opex); collection and
 demand and subsidy are the binding constraints; the safety substrate, the corroboration engine, and
