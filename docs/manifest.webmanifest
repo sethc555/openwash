@@ -1,0 +1,17 @@
+{
+  "name": "OpenWASH — reuse-safety guardrail",
+  "short_name": "OpenWASH",
+  "description": "Is my excreta/wastewater reuse safe? An honest, sourced screen — SAFE / UNSAFE / NOT ENOUGH EVIDENCE — with the fix and a dose plan. Works offline.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F2F4F1",
+  "theme_color": "#2C6E4A",
+  "lang": "en",
+  "categories": ["health", "utilities", "education"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

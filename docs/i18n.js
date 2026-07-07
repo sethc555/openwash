@@ -1,0 +1,113 @@
+/* OpenWASH — UI translation table (presentation layer only; it NEVER changes a verdict).
+ * The engine returns one structured verdict; this only localises the chrome around it.
+ *
+ * STATUS: English is the source of truth. The French is a DRAFT and must be reviewed by a native /
+ * WASH-domain speaker before field use — safety wording matters. The detailed verdict/dose prose the
+ * engine generates is still shown in English under a visible notice while that reviewed translation is
+ * pending (see key `fr_notice`). Adding a language = add a block with the SAME keys.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+;(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.OW_I18N = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  return {
+    en: {
+      lang_name: 'English',
+      try_eyebrow: 'Try it — no install',
+      try_h2: 'Check your own reuse design.',
+      try_intro: 'Answer a few plain questions and get a verdict, the reason, the specific fix, and — if it passes — how to confirm it on a real batch. The same rules as the engine, checked against the Python tool on 3,000+ designs. A screen, not a certificate — verify by measurement before reuse.',
+      q_material: 'What are you reusing?',
+      m_faeces: 'Faeces / dried faeces',
+      m_sludge: 'Faecal sludge (pit / tank / container)',
+      m_mixed: 'Mixed blackwater solids (settled)',
+      m_compost: 'Compost / material you believe is treated',
+      m_urine: 'Urine (kept separate)',
+      q_route: 'Where is it going?',
+      r_food_raw: 'Crops eaten raw (salad, veg)',
+      r_food_processed: 'Crops that are cooked / processed',
+      r_non_food: 'Non-food crops (fodder, trees, fibre)',
+      r_soil_only: 'Soil, no crop',
+      q_treatment: 'How was it treated?',
+      t_storage: 'Stored / aged (time + temperature)',
+      t_ammonia: 'Urine / urea / ash added (raises pH — ammonia)',
+      t_thermal: 'Heat / hot composting (≥50 °C)',
+      t_none: 'Not treated',
+      i_temp: 'Temperature (°C)',
+      i_temp_store: 'Storage temperature (°C)',
+      i_temp_hold: 'Temperature held (°C)',
+      i_days_store: 'Stored how many DAYS?',
+      i_days_held: 'Held how many DAYS?',
+      i_days_for: 'For how many DAYS?',
+      i_months: 'Stored how many MONTHS?',
+      i_ph: 'Approx pH',
+      i_measured_q: 'Measured the ammonia dose?',
+      i_measured_yes: 'Yes — I have a strip/lab reading',
+      i_measured_no: 'No — only pH, or it’s just lime/ash',
+      i_dose: 'Total ammoniacal-N (mM)',
+      i_dose_hint: 'mg/L ÷ 14 ≈ mM. Hydrolysed urine/urea ≈ 150–300 mM.',
+      i_measured_hint: 'pH alone can’t confirm ammonia — lime raises pH but adds no nitrogen.',
+      none_hint: 'Untreated excreta is a disease vector — no numbers needed.',
+      btn_check: 'Check',
+      badge_SAFE_SCREEN: 'SAFE — by screen',
+      badge_UNSAFE: 'UNSAFE',
+      badge_UNKNOWN: 'NOT ENOUGH EVIDENCE',
+      dose_tag: '→ How to sanitise it by ammonia',
+      dose_for: 'For a',
+      dose_kg: 'add ~{a}–{b} kg urea (1–2%, × your fill level).',
+      dose_pit: 'a pit can’t be sealed or mixed — empty it into a drum and treat there.',
+      confirm_h: 'Now confirm it on the real batch — cheap to hard',
+      always: 'Always true. This is a SCREEN, not a safety certificate — the batch still needs testing before reuse. It says nothing about chemical hazards (antibiotic resistance, heavy metals, pharmaceuticals). And it is not medical advice.',
+      fr_notice: ''
+    },
+    fr: {
+      lang_name: 'Français',
+      try_eyebrow: 'Essayez — sans installation',
+      try_h2: 'Vérifiez votre projet de réutilisation.',
+      try_intro: 'Répondez à quelques questions simples pour obtenir un verdict, la raison, la correction précise et — si c’est validé — comment le confirmer sur un lot réel. Les mêmes règles que le moteur, vérifiées sur plus de 3 000 cas. Un dépistage, pas un certificat — vérifiez par la mesure avant toute réutilisation.',
+      q_material: 'Que réutilisez-vous ?',
+      m_faeces: 'Matières fécales / fèces séchées',
+      m_sludge: 'Boues de vidange (fosse / réservoir / conteneur)',
+      m_mixed: 'Solides d’eaux-vannes mélangés (décantés)',
+      m_compost: 'Compost / matière que vous croyez traitée',
+      m_urine: 'Urine (séparée)',
+      q_route: 'Où va-t-elle ?',
+      r_food_raw: 'Cultures consommées crues (salade, légumes)',
+      r_food_processed: 'Cultures cuites / transformées',
+      r_non_food: 'Cultures non alimentaires (fourrage, arbres, fibres)',
+      r_soil_only: 'Sol, sans culture',
+      q_treatment: 'Comment a-t-elle été traitée ?',
+      t_storage: 'Stockée / vieillie (durée + température)',
+      t_ammonia: 'Urine / urée / cendre ajoutée (augmente le pH — ammoniac)',
+      t_thermal: 'Chaleur / compostage thermophile (≥50 °C)',
+      t_none: 'Non traitée',
+      i_temp: 'Température (°C)',
+      i_temp_store: 'Température de stockage (°C)',
+      i_temp_hold: 'Température maintenue (°C)',
+      i_days_store: 'Stockée combien de JOURS ?',
+      i_days_held: 'Maintenue combien de JOURS ?',
+      i_days_for: 'Pendant combien de JOURS ?',
+      i_months: 'Stockée combien de MOIS ?',
+      i_ph: 'pH approximatif',
+      i_measured_q: 'Avez-vous mesuré la dose d’ammoniac ?',
+      i_measured_yes: 'Oui — j’ai une mesure (bandelette/labo)',
+      i_measured_no: 'Non — seulement le pH, ou c’est de la chaux/cendre',
+      i_dose: 'Azote ammoniacal total (mM)',
+      i_dose_hint: 'mg/L ÷ 14 ≈ mM. Urine/urée hydrolysée ≈ 150–300 mM.',
+      i_measured_hint: 'Le pH seul ne confirme pas l’ammoniac — la chaux augmente le pH mais n’apporte pas d’azote.',
+      none_hint: 'Les excreta non traités sont un vecteur de maladie — aucun chiffre nécessaire.',
+      btn_check: 'Vérifier',
+      badge_SAFE_SCREEN: 'SÛR — au dépistage',
+      badge_UNSAFE: 'DANGEREUX',
+      badge_UNKNOWN: 'PREUVES INSUFFISANTES',
+      dose_tag: '→ Comment l’assainir par l’ammoniac',
+      dose_for: 'Pour un',
+      dose_kg: 'ajoutez ~{a}–{b} kg d’urée (1–2 %, × votre niveau de remplissage).',
+      dose_pit: 'une fosse ne peut être ni scellée ni mélangée — videz-la dans un fût et traitez-la là.',
+      confirm_h: 'Confirmez-le maintenant sur le lot réel — du simple au difficile',
+      always: 'Toujours vrai. Ceci est un DÉPISTAGE, pas un certificat de sécurité — le lot doit encore être testé avant réutilisation. Il ne dit rien des dangers chimiques (résistance aux antibiotiques, métaux lourds, produits pharmaceutiques). Et ce n’est pas un avis médical.',
+      fr_notice: 'Traduction provisoire — à faire vérifier par un locuteur natif / expert WASH. Le verdict (la couleur et les chiffres) est universel ; les explications détaillées restent en anglais en attendant une traduction spécialisée révisée.'
+    }
+  };
+});

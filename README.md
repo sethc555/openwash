@@ -123,7 +123,10 @@ wraps it into a check a non-expert can run at the point of decision.
 fix, and a batch-verification plan. It runs the *same rules* as the engine — [`docs/guardrail.js`](docs/guardrail.js)
 is a faithful port, and [`tests/parity.py`](tests/parity.py) checks it against the Python engine on
 3,000+ designs on every commit (the `web_parity` attested claim), so it can never drift into a second,
-unattested source of truth.
+unattested source of truth. It's a **PWA** — *installable to a phone home screen and works offline*
+(a field worker with no signal still gets a verdict) — with a **language switcher** (English + a
+French draft; the interface localises, and safety wording is flagged for native/WASH review before
+field use — see [`docs/i18n.js`](docs/i18n.js)).
 
 **And when it says UNSAFE, it tells you how to get to safe.** A sourced *dose planner*
 (`safe_reuse.dose_plan`, also in the browser) recommends the **tested** amendment — 1–2% urea by wet
@@ -188,7 +191,7 @@ data/            sources.yaml (23) · reuse_safety.yaml (42 claims) · dieoff_ki
 engine/          safe_reuse.py (the guardrail — usable check) · openwash.py (safety table)
                  · dieoff.py (die-off screen) · select.py (capability query) · systems.py (system chaining)
                  · costs.py (cost lookup) · watch.py (non-pathogen hazards)
-tests/           83 pytest checks — data integrity, corroboration, all 3 die-off regimes, capability
+tests/           87 pytest checks — data integrity, corroboration, all 3 die-off regimes, capability
                  query, system chaining, limitations, watch layer, safe-reuse guardrail + verification
                  plan (+ regressions). `python -m pytest tests/`
 docs/            index.html (the explainer + the no-install interactive guardrail)
