@@ -1,41 +1,41 @@
 {
   "schema": "claimcheck/v0.1",
-  "manifest_sha256": "f551285da423514f6d2eed8ee532ff54fe8ad729768ffdff80d4a30c4c1c1013",
+  "manifest_sha256": "68a2f3818f5a17144d48ec0d045de5c49d4714ec091401bf52113cb508ba997e",
   "artifact": {
     "title": "OpenWASH \u2014 an open, provenance-tagged reuse-safety substrate and guardrail for excreta reuse",
     "author": "Seth Cope",
     "orcid": "0009-0000-5520-915X",
     "doi": "",
     "repo": "https://github.com/sethc555/openwash",
-    "commit": "d46352a6efb5429a6c70e15adb1120ab00609cc9",
+    "commit": "ae41c9ac4f1b912f4e59d7a0bce742a7886f3380",
     "working_tree_dirty": false
   },
   "verifier": {
     "name": "claimcheck",
     "version": "0.1.0"
   },
-  "verified_at": "2026-07-07T17:27:59.713659+00:00",
+  "verified_at": "2026-07-07T17:53:00.901345+00:00",
   "host": {
     "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
     "python": "3.12.3"
   },
-  "environment_hash": "sha256:c9aa416babce42a97a1c4bbfcf873f2d03068da53e8827d868974d8e75d79b0a",
+  "environment_hash": "sha256:6b46bceed69d7cb192635b7c40e5b2cc6d0a2a85b6eaebf1c6b80818fe946a22",
   "results": [
     {
       "id": "suite",
       "status": "pass",
       "exit_code": 0,
-      "duration_s": 1.0,
+      "duration_s": 0.9,
       "detail": "",
-      "stdout_tail": "........................................................................ [ 87%]\n..........                                                               [100%]\n82 passed in 0.83s"
+      "stdout_tail": "........................................................................ [ 86%]\n...........                                                              [100%]\n83 passed in 0.76s"
     },
     {
       "id": "no_naked_numbers",
       "status": "pass",
       "exit_code": 0,
-      "duration_s": 0.4,
+      "duration_s": 0.3,
       "detail": "",
-      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.17s"
+      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.16s"
     },
     {
       "id": "sources_resolve",
@@ -43,13 +43,13 @@
       "exit_code": 0,
       "duration_s": 0.3,
       "detail": "",
-      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.15s"
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.14s"
     },
     {
       "id": "overclaim_caught",
       "status": "pass",
       "exit_code": 0,
-      "duration_s": 0.3,
+      "duration_s": 0.2,
       "detail": "",
       "stdout_tail": "..                                                                       [100%]\n2 passed in 0.07s"
     },
@@ -57,9 +57,9 @@
       "id": "target_vs_field",
       "status": "pass",
       "exit_code": 0,
-      "duration_s": 0.4,
+      "duration_s": 0.3,
       "detail": "",
-      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.15s"
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.14s"
     },
     {
       "id": "untreated_unsafe",
@@ -73,7 +73,7 @@
       "id": "malawi_field_contradiction",
       "status": "pass",
       "exit_code": 0,
-      "duration_s": 0.3,
+      "duration_s": 0.2,
       "detail": "",
       "stdout_tail": "..                                                                       [100%]\n2 passed in 0.06s"
     },
@@ -99,7 +99,7 @@
       "exit_code": 0,
       "duration_s": 0.2,
       "detail": "",
-      "stdout_tail": "parity: 3149/3149 verdicts identical (Python \u2194 browser JS)\ndose planner: 21/21 temperatures with identical kill-time estimates\nconstants: JS matches data/dieoff_kinetics.yaml \u2713"
+      "stdout_tail": "parity: 3149/3149 verdicts identical (Python \u2194 browser JS)\ndose planner: 21\u00d76 temp\u00d7container dose cases identical\nconstants: JS matches data/dieoff_kinetics.yaml \u2713"
     },
     {
       "id": "dieoff_reproduces_anchors",
