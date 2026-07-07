@@ -235,6 +235,25 @@ claims:
     claimed_tier: multi_corroborated
   notes: "Do NOT dilute stored urine; do not use near Schistosoma haematobium waters."
 
+# ---- Amendment dose (how to GET to safe, not just whether you are) ----------
+- id: amendment_dose_urea
+  category: amendment_dose
+  parameter: Urea addition to sanitize faeces/faecal sludge by ammonia
+  value:
+    value: {min: 1, max: 2}
+    unit: "% urea by wet weight"
+    sources:
+      - {ref: nordin2009, locator: "urea sanitisation of faeces (1–2% wt/wt, feces @ 17% DM)"}
+    claimed_tier: single_sourced
+  notes: >
+    Nordin 2009 TESTED 1–2% urea (wt/wt) on feces at ~83% moisture and measured 441–862 mM total
+    ammoniacal-N — well above the ~20 mM threshold — clearing Ascaris in ~4–50 d depending on
+    temperature. This is a PLANNING dose (a tested recipe, not a computed one): concentration
+    depends on the batch's water content (43–95% across faecal sludge), so MEASURE total
+    ammoniacal-N to confirm. Ash/lime raise pH but add ~no nitrogen — use them WITH urea/urine,
+    never instead. WHO 2006 endorses ammonia/urea treatment as a method (not cited here for the
+    specific %).
+
 # ---- Siting constraints (the 'just dig a trench' bounds) --------------------
 - id: siting_setback_from_water
   category: siting_constraint

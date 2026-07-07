@@ -59,6 +59,11 @@ def test_kinetics_constants_are_sourced():
     # both EPA-503 constants live in data as NUMBERS (not YAML strings), not hardcoded in the engine
     assert isinstance(tm["solids_ge_7pct_constant"], (int, float))
     assert isinstance(tm["solids_lt_7pct_constant"], (int, float))
+    # the amendment-dose planning data is sourced too (no naked numbers in the planner)
+    dose = am["dosing"]
+    assert dose["source"]["ref"]
+    assert all(r["source"]["ref"] for r in dose["measured_total_am_mM"])
+    assert dose["urine_total_am_mM"]["source"]["ref"]
 
 def test_faeces_query_uses_matrix_correct_t90_not_liquid_rate():
     # Salmonella's Table-3.8 rates are for greywater; a faeces query must fall back to T90

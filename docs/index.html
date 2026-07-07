@@ -119,6 +119,8 @@
   #result .plan h4{font-family:var(--mono); font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 9px}
   #result .step{font-size:.93rem; margin:0 0 10px} #result .step b{font-family:var(--mono); font-size:11.5px; color:var(--ink)}
   #result .step .how{color:var(--ink-soft); font-size:.89rem}
+  #result .dose{--st:var(--accent); margin-top:14px} #result .dose .tag{color:var(--accent-ink)}
+  #result .dose .detail{line-height:1.7}
   .tool .always{font-size:.84rem; color:var(--ink-soft); margin-top:16px; border-top:1px dashed var(--line); padding-top:12px}
 
   .callout{
@@ -430,6 +432,19 @@
         html += '</div>';
       }
       html += '</div>';
+      // "how to get to safe" — a sourced dose plan when a solids design isn't safe yet
+      if ((v.status === 'UNSAFE' || v.status === 'UNKNOWN') && m !== 'urine'){
+        var tt = val('i-temp'); var dt = (tt && !isNaN(tt)) ? tt : 25;
+        var dp = OpenWASH.dose_plan(dt);
+        html += '<div class="verdict dose"><div class="tag">→ How to sanitise it by ammonia</div>' +
+                '<p class="why">' + esc(dp.recommend) + '</p>' +
+                '<p class="fix">At ~' + esc(dt) + '&nbsp;°C, roughly: ' +
+                  dp.options.map(function(o){ return '<b>' + o.urea_pct + '% urea</b> → ~' + o.cure_days + ' days'; }).join(' · ') +
+                  ' (kept sealed, to hold the ammonia). Or use stored/hydrolysed urine (~' +
+                  dp.urine_alt_mM[0] + '–' + dp.urine_alt_mM[1] + '&nbsp;mM) — measure it.</p><div class="detail">';
+        dp.caveats.forEach(function(c){ html += '• ' + esc(c) + '<br>'; });
+        html += '</div></div>';
+      }
       result.innerHTML = html;
     }
 

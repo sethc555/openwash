@@ -29,6 +29,7 @@ DATA = D.load()
 ASC = DATA["organisms"]["ascaris"]
 AM  = ASC["ammonia_model"]
 
+DOSE = AM.get("dosing", {})                        # sourced amendment-dose planning data (Nordin 2009)
 TARGET_EGG = 1.0                                   # <=1 viable helminth egg / g TS (WHO 2006 Vol 4)
 REP_TOTAL_AMMONIACAL_MM = 200.0                    # representative hydrolysed-urine/urea dose (mM total N)
 ECOLI_LIMIT = 1000                                 # <1000 CFU/g TS (WHO 2006 Vol 4)  — verify_faeces_ecoli
@@ -185,6 +186,51 @@ def assess_urine(treatment, params, route):
               f"Store urine ≥{need} months at ~20°C before using on this crop class, or use it only on "
               "processed/non-food crops, or restrict to the producing household.")
 
+# ---- the amendment-dose PLANNER (how to get from UNSAFE to a plan) ----------
+def _ammonia_cure_days(temp, total_mM, pH, initial_eggs=40):
+    """Days to clear Ascaris at a given total ammoniacal-N dose, or None if below threshold.
+    Same kinetics as screen_ammonia — shared so the planner can never disagree with the screen."""
+    f, _ = D.nh3_fraction(pH, min(temp, 34.0))
+    nh3 = min(f * total_mM, AM.get("nh3_saturation_mM", 250.0))
+    k = D.k_ammonia(AM, min(temp, 34.0), nh3)
+    if k <= 0:
+        return None
+    return max(math.log10(initial_eggs / TARGET_EGG) / k, 2.0 / k)
+
+def dose_plan(temp):
+    """A SOURCED amendment-dose plan to sanitise faeces/faecal sludge by ammonia (Nordin 2009).
+
+    Recommends the TESTED urea dose (not one back-computed from an unknown moisture), and reads the
+    kill TIME off the same kinetics the screen uses. It is a PLANNING estimate — the concentration a
+    dose reaches depends on the batch's water content (too variable to assume), so the plan ends where
+    every path here ends: measure the actual dose to confirm. Returns None if no dose data is loaded.
+    """
+    if not DOSE.get("measured_total_am_mM"):
+        return None
+    ph = DOSE.get("self_buffer_pH", 9.0)
+    options = []
+    for row in DOSE["measured_total_am_mM"]:
+        cure = _ammonia_cure_days(temp, row["total_am_mM"], ph)
+        options.append({"urea_pct": row["urea_pct"], "total_mM": row["total_am_mM"],
+                        "cure_days": (None if cure is None else round(cure))})
+    return {
+        "recommend": "Add 1–2% urea by wet weight (Nordin 2009 — a tested dose, not a guess). "
+                     "It self-raises pH to ~9 and reaches a sanitising ammonia dose in typical faeces.",
+        "at_temp_C": temp,
+        "options": options,          # e.g. 1% urea → ~N days, 2% urea → ~M days at this temperature
+        "urine_alt_mM": DOSE.get("urine_total_am_mM", {}).get("stored_hydrolysed"),
+        "measure_threshold_mM": AM.get("threshold_mM"),
+        "caveats": [
+            "This is a PLANNING estimate — MEASURE total ammoniacal-N to confirm (Nordin reached "
+            "441–862 mM; you need well above the ~%s mM threshold), especially if the material is "
+            "much drier or wetter than typical faeces (~%s%% water)."
+            % (AM.get("threshold_mM"), DOSE.get("reference_moisture_pct")),
+            "Ash or lime raise pH but add ~no nitrogen — use them WITH urea/urine, never instead.",
+            "Keep it sealed at pH ≥9 to retain ammonia; colder material is BOTH slower and has less "
+            "active NH₃ at the same pH.",
+        ],
+    }
+
 # ---- the verification plan (what the paired TEST KIT must measure) ----------
 # The screen checks the DESIGN; a kit checks the DEPLOYED BATCH. Mirrors WHO multi-barrier /
 # HACCP: verify the critical control points cheaply & routinely, confirm the hard endpoint
@@ -234,6 +280,19 @@ def verification_plan(material, treatment, params, route):
 
 # ---- presentation ----------------------------------------------------------
 BADGE = {"SAFE_SCREEN": "✅ SAFE (by screen)", "UNSAFE": "✗ UNSAFE", "UNKNOWN": "❓ NOT ENOUGH EVIDENCE"}
+
+def print_dose_plan(temp):
+    p = dose_plan(temp)
+    if not p:
+        return
+    print("\n  ── HOW TO SANITISE IT BY AMMONIA (a sourced PLAN — then measure) ──")
+    print(f"  {p['recommend']}")
+    print(f"  At ~{temp}°C, roughly:  " +
+          "  ·  ".join(f"{o['urea_pct']}% urea → ~{o['cure_days']} d" for o in p["options"]) + "  (kept sealed).")
+    if p.get("urine_alt_mM"):
+        print(f"  Or stored/hydrolysed urine (~{p['urine_alt_mM'][0]}–{p['urine_alt_mM'][1]} mM) — measure it.")
+    for c in p["caveats"]:
+        print(f"    • {c}")
 
 def report(material, route, verdict, plan=None):
     print("\n" + "═"*66)
@@ -312,6 +371,9 @@ def interactive():
         v = assess(material, treatment, params, route)
     plan = verification_plan(material, treatment, params, route) if v["status"] == "SAFE_SCREEN" else None
     report(material, route, v, plan)
+    # if it isn't safe yet (and it's not urine), offer the sourced dose plan to GET there
+    if v["status"] in ("UNSAFE", "UNKNOWN") and material != "urine":
+        print_dose_plan(params[0] if params else 25)
 
 def demo():
     cases = [

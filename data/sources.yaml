@@ -98,6 +98,14 @@ sources:
     license: "peer-reviewed"
     doi: 10.1016/j.watres.2015.06.030
 
+  udert2006:
+    title: "Complete nutrient recovery from source-separated urine by nitrification and distillation (urea hydrolysis → ammonia; total ammoniacal-N of stored urine)"
+    org: "Udert, Larsen & Gujer, Water Science & Technology"
+    year: 2006
+    lineage: urine_nitrogen        # independent measurement of urine N / hydrolysis (Eawag)
+    license: "peer-reviewed"
+    doi: 10.2166/wst.2006.921
+
   epa503:
     title: "40 CFR Part 503 — Standards for the Use or Disposal of Sewage Sludge (time–temperature requirement for Class A pathogen reduction)"
     org: "US EPA"

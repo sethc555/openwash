@@ -112,7 +112,18 @@ def check():
     const_errs = _check_constants(json.loads(dproc.stdout)) if dproc.returncode == 0 else \
         [f"could not read JS constants: {dproc.stderr}"]
 
-    ok = not mism and not const_errs
+    # dose-planner parity — the recommended-dose kill-time estimates must match across temperature
+    temps = list(range(4, 46, 2))
+    py_dose = [[o["cure_days"] for o in SR.dose_plan(t)["options"]] for t in temps]
+    dscript = ("var G=require(process.argv[1]);var ts=JSON.parse(process.argv[2]);"
+               "process.stdout.write(JSON.stringify(ts.map(function(t){"
+               "return G.dose_plan(t).options.map(function(o){return o.cure_days;});})));")
+    dp = subprocess.run([node, "-e", dscript, GUARDRAIL_JS, json.dumps(temps)],
+                        capture_output=True, text=True, timeout=30)
+    js_dose = json.loads(dp.stdout) if dp.returncode == 0 else None
+    dose_ok = (js_dose == py_dose)
+
+    ok = not mism and not const_errs and dose_ok
     lines = [f"parity: {len(cases) - len(mism)}/{len(cases)} verdicts identical (Python ↔ browser JS)"]
     for c, p, j in mism[:20]:
         lines.append(f"  MISMATCH {c}: python={p} js={j}")
@@ -120,6 +131,8 @@ def check():
         lines.append(f"  … and {len(mism) - 20} more")
     for e in const_errs:
         lines.append(f"  {e}")
+    lines.append(f"dose planner: {len(temps)}/{len(temps)} temperatures with identical kill-time estimates"
+                 if dose_ok else f"  DOSE MISMATCH: python={py_dose} js={js_dose}")
     if ok:
         lines.append("constants: JS matches data/dieoff_kinetics.yaml ✓")
     return ok, "\n".join(lines)

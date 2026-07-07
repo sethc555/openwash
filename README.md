@@ -125,6 +125,13 @@ is a faithful port, and [`tests/parity.py`](tests/parity.py) checks it against t
 3,000+ designs on every commit (the `web_parity` attested claim), so it can never drift into a second,
 unattested source of truth.
 
+**And when it says UNSAFE, it tells you how to get to safe.** A sourced *dose planner*
+(`safe_reuse.dose_plan`, also in the browser) recommends the **tested** amendment — 1–2% urea by wet
+weight (Nordin 2009) — and reads the kill time off the same kinetics at your temperature. It refuses
+ash/lime as a nitrogen source (they raise pH but add no N — the exact false-safe the audit caught),
+and ends where everything here does: *measure the actual dose to confirm.* It is a planning estimate,
+not a promise.
+
 **Or from a terminal:**
 
 ```
@@ -181,7 +188,7 @@ data/            sources.yaml (23) · reuse_safety.yaml (42 claims) · dieoff_ki
 engine/          safe_reuse.py (the guardrail — usable check) · openwash.py (safety table)
                  · dieoff.py (die-off screen) · select.py (capability query) · systems.py (system chaining)
                  · costs.py (cost lookup) · watch.py (non-pathogen hazards)
-tests/           81 pytest checks — data integrity, corroboration, all 3 die-off regimes, capability
+tests/           82 pytest checks — data integrity, corroboration, all 3 die-off regimes, capability
                  query, system chaining, limitations, watch layer, safe-reuse guardrail + verification
                  plan (+ regressions). `python -m pytest tests/`
 docs/            index.html (the explainer + the no-install interactive guardrail)

@@ -77,6 +77,20 @@ def test_urine_verification_plan_is_urine_specific():
     plan = SR.verification_plan("urine", "storage", (20, 6), "food_raw")
     assert "faecal contact" in " ".join(plan[0]).lower()
 
+def test_dose_plan_recommends_the_tested_urea_dose_conservatively():
+    p = SR.dose_plan(24)
+    assert p is not None
+    assert sorted(o["urea_pct"] for o in p["options"]) == [1, 2]      # the sourced 1–2% urea dose
+    d = {o["urea_pct"]: o["cure_days"] for o in p["options"]}
+    # times must be >= Nordin's published T99 anchors (conservative): 1%@24≈47 d, 2%@24≈28 d
+    assert d[1] >= 47 and d[2] >= 28
+    # colder is slower — the honest temperature penalty
+    assert SR.dose_plan(14)["options"][0]["cure_days"] > d[1]
+    # ash is explicitly excluded as a nitrogen source, and the plan ends in MEASUREMENT
+    caveats = " ".join(p["caveats"]).lower()
+    assert "ash" in caveats and "no nitrogen" in caveats
+    assert "measure" in caveats
+
 def test_process_tier_matches_the_treatment():
     assert "pH" in " ".join(SR.verification_plan("sludge", "ammonia", (30, 60, 9.1), "soil_only")[0])
     assert "centre" in " ".join(SR.verification_plan("sludge", "thermal", (55, 10), "non_food")[0]).lower()

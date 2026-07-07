@@ -38,6 +38,12 @@
       min_temp_C: 50,
       const_ge_7pct: 1.317e8         // solids_ge_7pct_constant — 40 CFR 503.32(a)(3)
     },
+    dose: {                          // ascaris.ammonia_model.dosing (Nordin 2009)
+      self_buffer_pH: 9.0,
+      reference_moisture_pct: 83,
+      measured: [ { urea_pct: 1, total_mM: 441 }, { urea_pct: 2, total_mM: 675 } ],
+      urine_alt_mM: [200, 280]       // stored/hydrolysed urine ~3–4 g N/L (Udert 2006)
+    },
     routes: ['food_raw', 'food_processed', 'non_food', 'soil_only']
   };
 
@@ -171,6 +177,36 @@
         'crops, or restrict to the producing household.');
   }
 
+  // ---- amendment-dose planner (how to get from UNSAFE to a plan) — port of safe_reuse.dose_plan ----
+  function ammonia_cure_days(temp, total_mM, pH, initial) {
+    initial = initial || DATA.DEFAULT_INITIAL_EGGS;
+    var Tc = Math.min(temp, 34.0);
+    var nh3 = Math.min(nh3_fraction(pH, Tc) * total_mM, DATA.ammonia.nh3_saturation_mM);
+    var k = k_ammonia(Tc, nh3);
+    if (k <= 0) return null;
+    return Math.max(Math.log10(initial / DATA.TARGET_EGG) / k, 2.0 / k);
+  }
+  function dose_plan(temp) {
+    var ph = DATA.dose.self_buffer_pH;
+    var options = DATA.dose.measured.map(function (row) {
+      var cure = ammonia_cure_days(temp, row.total_mM, ph);
+      return { urea_pct: row.urea_pct, total_mM: row.total_mM, cure_days: (cure == null ? null : Math.round(cure)) };
+    });
+    return {
+      recommend: 'Add 1–2% urea by wet weight (Nordin 2009 — a tested dose, not a guess). It self-raises ' +
+        'pH to ~9 and reaches a sanitising ammonia dose in typical faeces.',
+      at_temp_C: temp, options: options,
+      urine_alt_mM: DATA.dose.urine_alt_mM, measure_threshold_mM: DATA.ammonia.threshold_mM,
+      caveats: [
+        'This is a PLANNING estimate — MEASURE total ammoniacal-N to confirm (Nordin reached 441–862 mM; ' +
+          'you need well above the ~' + DATA.ammonia.threshold_mM + ' mM threshold), especially if the material ' +
+          'is much drier or wetter than typical faeces (~' + DATA.dose.reference_moisture_pct + '% water).',
+        'Ash or lime raise pH but add ~no nitrogen — use them WITH urea/urine, never instead.',
+        'Keep it sealed at pH ≥9 to retain ammonia; colder material is BOTH slower and has less active NH₃ at the same pH.'
+      ]
+    };
+  }
+
   // params: storage/thermal [temp, days]; ammonia [temp, days, pH, total_mM|null]; urine [temp, months]
   function assess(material, treatment, params, route) {
     if (DATA.routes.indexOf(route) < 0) return v('UNKNOWN',
@@ -214,6 +250,7 @@
   return {
     assess: assess, screen_storage: screen_storage, screen_ammonia: screen_ammonia,
     screen_thermal: screen_thermal, assess_urine: assess_urine, verification_plan: verification_plan,
+    dose_plan: dose_plan, ammonia_cure_days: ammonia_cure_days,
     nh3_fraction: nh3_fraction, k_ammonia: k_ammonia, epa_thermal_days: epa_thermal_days,
     ascaris_rule: ascaris_rule, DATA: DATA
   };

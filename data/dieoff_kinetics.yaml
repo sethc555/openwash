@@ -70,6 +70,24 @@ organisms:
       # does NOT use a smooth shoulder; instead it treats t99 as the robustness threshold:
       # a "pass" achieved in << t99 relies on the optimistic early/lag phase and is flagged.
       lag_note: "log-linear over-credits sub-t99 exposures (lag phase); require days >= t99 for a robust pass."
+      # ---- dose PLANNING data (for the amendment-dose planner; see reuse_safety amendment_dose_urea) ----
+      # A planner recommends the TESTED urea dose (not a computed one) and reads kill-time off the
+      # kinetics above. Concentration depends on the substrate's water content, which is too variable
+      # to hard-code (43–95% water across faecal sludge) — so this is a PLANNING estimate to be measured.
+      dosing:
+        urea_n_fraction: 0.466              # g N per g urea — deterministic: 2*14.007 / 60.06 (MW urea)
+        self_buffer_pH: 9.0                 # urea hydrolysis self-buffers faeces to ~pH 9 (Nordin 2009)
+        reference_moisture_pct: 83          # Nordin conditioned feces to 17% DM (~83% water); dose is for this
+        ash_adds_no_nitrogen: true          # ash/lime RAISE pH but add ~0 N — cannot substitute for urea/urine
+        # Nordin 2009 MEASURED total ammoniacal-N produced (mM) at the tested doses (feces @ 17% DM,
+        # conservative 24 °C values; the 34 °C values are higher). The planner reads kill-TIME off the
+        # kinetics at the batch temperature using these concentrations.
+        measured_total_am_mM:
+          - {urea_pct: 1, total_am_mM: 441, source: {ref: nordin2009}}
+          - {urea_pct: 2, total_am_mM: 675, source: {ref: nordin2009}}
+        # Alternative amendment: stored/hydrolysed urine (~90% of N as ammonia). Wide band — measure.
+        urine_total_am_mM: {stored_hydrolysed: [200, 280], note: "~3–4 g N/L hydrolysed urine", source: {ref: udert2006}}
+        source: {ref: nordin2009, locator: "urea sanitisation of faeces; measured NH3"}
     # Thermal-treatment regime (composting / pasteurisation, T >= 50 °C). Uses the US EPA
     # 40 CFR 503 Class-A time–temperature requirement (covers viable helminth ova):
     #   required_days D = 131,700,000 / 10^(0.1400·T)   [T in °C, >=7% solids]
