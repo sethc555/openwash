@@ -1,25 +1,25 @@
 {
   "schema": "claimcheck/v0.1",
-  "manifest_sha256": "d1d0be775ee33a0d09b73c50a1c559265b20f6549afb8a7fa059a63bfb05663b",
+  "manifest_sha256": "f551285da423514f6d2eed8ee532ff54fe8ad729768ffdff80d4a30c4c1c1013",
   "artifact": {
     "title": "OpenWASH \u2014 an open, provenance-tagged reuse-safety substrate and guardrail for excreta reuse",
     "author": "Seth Cope",
     "orcid": "0009-0000-5520-915X",
     "doi": "",
     "repo": "https://github.com/sethc555/openwash",
-    "commit": "785ef437fd04fc4fa708481928c761ff4f19a642",
-    "working_tree_dirty": false
+    "commit": "8b9ad3f54a5daed49534fec25fa6855d6fc223c4",
+    "working_tree_dirty": true
   },
   "verifier": {
     "name": "claimcheck",
     "version": "0.1.0"
   },
-  "verified_at": "2026-07-07T16:40:12.973874+00:00",
+  "verified_at": "2026-07-07T17:27:47.382609+00:00",
   "host": {
     "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
     "python": "3.12.3"
   },
-  "environment_hash": "sha256:95a3f6d5d9c5196dc2ca2db3ea40b30343865cc316215bf42c0c15e96136033b",
+  "environment_hash": "sha256:c9aa416babce42a97a1c4bbfcf873f2d03068da53e8827d868974d8e75d79b0a",
   "results": [
     {
       "id": "suite",
@@ -27,7 +27,7 @@
       "exit_code": 0,
       "duration_s": 1.0,
       "detail": "",
-      "stdout_tail": "........................................................................ [ 88%]\n.........                                                                [100%]\n81 passed in 0.79s"
+      "stdout_tail": "........................................................................ [ 87%]\n..........                                                               [100%]\n82 passed in 0.81s"
     },
     {
       "id": "no_naked_numbers",
@@ -99,7 +99,7 @@
       "exit_code": 0,
       "duration_s": 0.2,
       "detail": "",
-      "stdout_tail": "parity: 3149/3149 verdicts identical (Python \u2194 browser JS)\nconstants: JS matches data/dieoff_kinetics.yaml \u2713"
+      "stdout_tail": "parity: 3149/3149 verdicts identical (Python \u2194 browser JS)\ndose planner: 21/21 temperatures with identical kill-time estimates\nconstants: JS matches data/dieoff_kinetics.yaml \u2713"
     },
     {
       "id": "dieoff_reproduces_anchors",
