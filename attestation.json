@@ -1,33 +1,33 @@
 {
   "schema": "claimcheck/v0.1",
-  "manifest_sha256": "68a2f3818f5a17144d48ec0d045de5c49d4714ec091401bf52113cb508ba997e",
+  "manifest_sha256": "8bd26cdb9d613fa04b9f4bede2046568528ee5888b120112a8c2236ba761a361",
   "artifact": {
     "title": "OpenWASH \u2014 an open, provenance-tagged reuse-safety substrate and guardrail for excreta reuse",
     "author": "Seth Cope",
     "orcid": "0009-0000-5520-915X",
     "doi": "",
     "repo": "https://github.com/sethc555/openwash",
-    "commit": "08cde68eac7bd359721d415dbee8171727e4e0df",
+    "commit": "dab106a1e6dd1d95a5b06fd39318d4e9a4944e9e",
     "working_tree_dirty": false
   },
   "verifier": {
     "name": "claimcheck",
     "version": "0.1.0"
   },
-  "verified_at": "2026-07-07T17:53:04.443471+00:00",
+  "verified_at": "2026-07-07T18:21:45.771504+00:00",
   "host": {
     "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
     "python": "3.12.3"
   },
-  "environment_hash": "sha256:6b46bceed69d7cb192635b7c40e5b2cc6d0a2a85b6eaebf1c6b80818fe946a22",
+  "environment_hash": "sha256:32dcc9d6a7dff26f011f73e332aa8a7d6a0ca8c8ffb1b405555a7c1699e07318",
   "results": [
     {
       "id": "suite",
       "status": "pass",
       "exit_code": 0,
-      "duration_s": 0.9,
+      "duration_s": 1.0,
       "detail": "",
-      "stdout_tail": "........................................................................ [ 86%]\n...........                                                              [100%]\n83 passed in 0.75s"
+      "stdout_tail": "........................................................................ [ 82%]\n...............                                                          [100%]\n87 passed in 0.77s"
     },
     {
       "id": "no_naked_numbers",
@@ -35,7 +35,7 @@
       "exit_code": 0,
       "duration_s": 0.3,
       "detail": "",
-      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.16s"
+      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.15s"
     },
     {
       "id": "sources_resolve",
@@ -51,7 +51,7 @@
       "exit_code": 0,
       "duration_s": 0.2,
       "detail": "",
-      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.07s"
+      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.06s"
     },
     {
       "id": "target_vs_field",
