@@ -61,6 +61,14 @@
       always: 'Always true. This is a SCREEN, not a safety certificate — the batch still needs testing before reuse. It says nothing about chemical hazards (antibiotic resistance, heavy metals, pharmaceuticals). And it is not medical advice.',
       share_h: 'Use it on a phone',
       share_body: 'Scan the code, or open the link. It works OFFLINE once loaded — no signal needed. Your browser may also offer “Add to Home screen” to keep it like an app.',
+      presets_h: 'Or start from a common case:',
+      preset_pit: 'Pit sludge · 6 months',
+      preset_urea: 'Urea-treated drum · 60 d',
+      preset_urine: 'Stored urine · 6 mo',
+      preset_compost: 'Compost held at 45 °C',
+      btn_share: 'Share result',
+      share_caveat: 'A screen, not a certificate — test before reuse.',
+      copied: 'Copied — paste it anywhere',
       fr_notice: ''
     },
     fr: {
@@ -111,6 +119,14 @@
       always: 'Toujours vrai. Ceci est un DÉPISTAGE, pas un certificat de sécurité — le lot doit encore être testé avant réutilisation. Il ne dit rien des dangers chimiques (résistance aux antibiotiques, métaux lourds, produits pharmaceutiques). Et ce n’est pas un avis médical.',
       share_h: 'Utilisez-le sur un téléphone',
       share_body: 'Scannez le code, ou ouvrez le lien. Il fonctionne HORS LIGNE une fois chargé — aucun réseau nécessaire. Votre navigateur peut aussi proposer « Ajouter à l’écran d’accueil » pour le garder comme une application.',
+      presets_h: 'Ou partez d’un cas courant :',
+      preset_pit: 'Boues de fosse · 6 mois',
+      preset_urea: 'Fût traité à l’urée · 60 j',
+      preset_urine: 'Urine stockée · 6 mois',
+      preset_compost: 'Compost à 45 °C',
+      btn_share: 'Partager le résultat',
+      share_caveat: 'Un dépistage, pas un certificat — testez avant réutilisation.',
+      copied: 'Copié — collez-le où vous voulez',
       fr_notice: 'Traduction provisoire — à faire vérifier par un locuteur natif / expert WASH. Le verdict (la couleur et les chiffres) est universel ; les explications détaillées restent en anglais en attendant une traduction spécialisée révisée.'
     }
   };
