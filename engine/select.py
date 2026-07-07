@@ -43,6 +43,7 @@ REUSE_HINT = {
     "dried_faeces": "dried faeces → WHO storage rule + Ascaris screen (dieoff.py storage)",
     "compost":      "compost → thermophilic ≥50 °C/≥1 wk (reuse_safety composting_thermophilic)",
     "pit_humus":    "pit humus → variable reduction; treat as unsanitized (Kumwenda caveat)",
+    "biosolids":    "biosolids (treated sludge) → land application needs <1 viable helminth egg/g TS (reuse_safety verify_faeces_helminth)",
     "urine":        "urine → storage rule 20 °C/≥6 mo for all crops (reuse_safety urine_storage)",
     "effluent":     "effluent to irrigation → required log reduction 6–7 (reuse_safety logred_*)",
 }
@@ -68,29 +69,42 @@ def disqualifiers(tech, site):
     have = SKILL.get(site["skilled_labour"], 0)
     if need > have:
         out.append(("skilled_labour", f"needs {req['skilled_labour']} skill; site has {site['skilled_labour']}"))
-    # water table vs pit depth
+    # water table vs pit depth — FAIL-CLOSED: a safety tool must not clear a deep pit at a site
+    # whose water-table depth is unknown (silently passing an un-screenable pit is a false-fit).
     sit = tech.get("siting", {})
-    if sit.get("pit_depth_m") is not None and site.get("water_table_depth_m") is not None:
+    if sit.get("pit_depth_m") is not None:
+        wt = site.get("water_table_depth_m")
         clr = sit.get("clearance_above_water_table_m", 0)
         need_depth = sit["pit_depth_m"] + clr
-        if site["water_table_depth_m"] < need_depth:
+        if wt is None:
+            out.append(("water_table_unknown",
+                        f"needs the water-table depth to screen a {sit['pit_depth_m']} m pit (+{clr} m "
+                        f"clearance = {need_depth} m); site did not provide it"))
+        elif wt < need_depth:
             out.append(("water_table",
                         f"pit is {sit['pit_depth_m']} m deep + {clr} m clearance = needs {need_depth} m; "
-                        f"water table at {site['water_table_depth_m']} m"))
+                        f"water table at {wt} m"))
     # land
-    if site.get("land_m2_per_capita") is not None:
-        lpc = tech.get("land_m2_per_capita")
-        if isinstance(lpc, dict):
-            req_land = lpc["value"]["min"]
-            if site["land_m2_per_capita"] < req_land:
-                out.append(("land", f"needs {req_land}+ m²/person; site has {site['land_m2_per_capita']}"))
-        elif tech.get("land_demand") == "high":
-            thr = 3   # engine heuristic (see technologies.yaml meta.heuristics)
-            if site["land_m2_per_capita"] < thr:
-                out.append(("land", f"land-hungry (>~{thr} m²/person heuristic); site has {site['land_m2_per_capita']}"))
-    # reuse endpoints need agricultural land (heuristic ~1 m²/person)
-    if req.get("reuse_land") and site.get("land_m2_per_capita") is not None and site["land_m2_per_capita"] < 1:
-        out.append(("reuse_land", f"on-site reuse needs land (>~1 m²/person); site has {site['land_m2_per_capita']}"))
+    land = site.get("land_m2_per_capita")
+    lpc = tech.get("land_m2_per_capita")
+    if isinstance(lpc, dict):
+        req_land = lpc["value"]["min"]
+        if land is None:
+            out.append(("land_unknown", f"needs {req_land}+ m²/person; site land not provided"))
+        elif land < req_land:
+            out.append(("land", f"needs {req_land}+ m²/person; site has {land}"))
+    elif tech.get("land_demand") == "high":
+        thr = 3   # engine heuristic (see technologies.yaml meta.heuristics)
+        if land is None:
+            out.append(("land_unknown", f"land-hungry (>~{thr} m²/person heuristic); site land not provided"))
+        elif land < thr:
+            out.append(("land", f"land-hungry (>~{thr} m²/person heuristic); site has {land}"))
+    # reuse endpoints need agricultural land (heuristic ~1 m²/person) — fail-closed on unknown
+    if req.get("reuse_land"):
+        if land is None:
+            out.append(("reuse_land_unknown", "on-site reuse needs land (>~1 m²/person); site land not provided"))
+        elif land < 1:
+            out.append(("reuse_land", f"on-site reuse needs land (>~1 m²/person); site has {land}"))
     # infiltration endpoints need permeable soil
     if req.get("permeable_soil") and site.get("soil_permeability", "good") != "good":
         out.append(("soil", f"needs permeable soil to infiltrate; site soil is {site.get('soil_permeability')}"))

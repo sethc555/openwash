@@ -24,6 +24,13 @@ def test_restates_does_not_add_independence():
     lineages = openwash.independent_lineages(c["value"], SOURCES)
     assert lineages == {"who_2006_reuse"}
 
+def test_pure_echoes_do_not_manufacture_multi_corroboration():
+    # round-3 fix: two restatements of DIFFERENT lineages, with NO primary source, must not
+    # read as multi_corroborated (the latent restates-fold inflation path).
+    vb = {"sources": [{"ref": "a", "restates": "A"}, {"ref": "b", "restates": "B"}]}
+    assert openwash.computed_tier(vb, SOURCES) != "multi_corroborated"
+    assert openwash.independent_lineages(vb, SOURCES) == set()
+
 def test_validate_reports_no_errors():
     errs, _warns = openwash.validate(SOURCES, DATA)
     assert errs == []

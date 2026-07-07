@@ -12,6 +12,13 @@ def test_every_hazard_is_sourced_with_evidence():
         for e in h["evidence"]:
             assert e["source"]["ref"] in SOURCES, f"{h['id']}: unknown source {e['source']['ref']}"
 
+def test_dried_faeces_carries_a_nonpathogen_flag():
+    # round-3 fix: direct dried-faeces reuse must not escape the AMR / micropollutant watch
+    covered = {p for h in HAZARDS for p in h["applies_to_products"]}
+    assert "dried_faeces" in covered
+    amr = next(h for h in HAZARDS if h["id"] == "amr_args")
+    assert "dried_faeces" in amr["applies_to_products"]
+
 def test_hazard_fields_present():
     ids = set()
     for h in HAZARDS:

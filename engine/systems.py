@@ -88,8 +88,19 @@ def render(data, site, system, rank, sc):
         t = byid[i]
         io = f"[{'+'.join(t.get('inputs',[])) or '—'}] → [{'+'.join(t.get('outputs',[])) or 'end'}]"
         print(f"       {t['id']:<5} {t['name']:<40} {io}")
-    checks = [(i, rp, sel.REUSE_HINT[rp]) for i in techs for rp in byid[i].get("reuse_products", []) if rp in sel.REUSE_HINT]
-    for i, rp, hint in checks:
+    # Pathogen safety flag. (a) any node carrying a hinted reuse product; (b) any reuse ENDPOINT
+    # that grows biomass but produced no hinted flag above (e.g. an arborloo, or land-applied
+    # material with an un-hinted product) — so NO reuse endpoint escapes the pathogen screen.
+    checks = [(i, sel.REUSE_HINT[rp]) for i in techs
+              for rp in byid[i].get("reuse_products", []) if rp in sel.REUSE_HINT]
+    flagged = {i for i, _ in checks}
+    for i in techs:
+        if is_reuse(i) and i not in flagged:
+            checks.append((i, "in-situ biomass / edible reuse → the applied excreta or humus must meet "
+                              "<1 viable helminth egg/g TS before edible-crop use; untreated shallow-pit "
+                              "reuse (e.g. an arborloo fruit tree) is a direct fecal–oral pathway "
+                              "(reuse_safety verify_faeces_helminth)"))
+    for i, hint in checks:
         print(f"       ⚑ {i} → {hint}")
     reuse_prods = {rp for i in techs for rp in byid[i].get("reuse_products", [])}
     watch = sorted({h["name"].split(" (")[0] for h in WATCH if reuse_prods & set(h["applies_to_products"])})

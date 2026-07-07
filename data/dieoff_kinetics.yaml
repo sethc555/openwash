@@ -88,7 +88,8 @@ organisms:
           of decay below ~50 C. So the engine ADVISES here — it neither rejects
           outright nor invents a pass/fail number.
         sources: [{ref: harroff2019}, {ref: naidoo2020}, {ref: espinosa2020}]
-      solids_lt_7pct_constant: 5.007e7   # 40 CFR 503.32(a)(4) alt for <7% solids / small particles
+      solids_ge_7pct_constant: 1.317e+8  # 40 CFR 503.32(a)(3) primary curve (>=7% solids)
+      solids_lt_7pct_constant: 5.007e+7  # 40 CFR 503.32(a)(4) alt for <7% solids / small particles
       source: {ref: epa503, locator: "40 CFR 503.32(a)(3)"}
       cross_check:                        # sourced points this regulatory curve is consistent with
         - {temp_C: 50, epa_days: 13.2, who: ">1 week", source: {ref: who2006_vol4, page: 89}}

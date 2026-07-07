@@ -48,6 +48,9 @@ def test_kinetics_constants_are_sourced():
     assert am["source"]["ref"] and all(a["source"]["ref"] for a in am["anchors_t99_days"])
     tm = asc["thermal_model"]
     assert tm["source"]["ref"] and all(p["source"]["ref"] for p in tm["cross_check"])
+    # both EPA-503 constants live in data as NUMBERS (not YAML strings), not hardcoded in the engine
+    assert isinstance(tm["solids_ge_7pct_constant"], (int, float))
+    assert isinstance(tm["solids_lt_7pct_constant"], (int, float))
 
 def test_faeces_query_uses_matrix_correct_t90_not_liquid_rate():
     # Salmonella's Table-3.8 rates are for greywater; a faeces query must fall back to T90

@@ -93,7 +93,7 @@ def epa_thermal_days(data, temp, solids="high"):
     (safe_reuse.screen_thermal) and the anchor test both call this, so the constant
     can't be silently changed without moving the tested value."""
     tm = data["organisms"]["ascaris"]["thermal_model"]
-    const = tm["solids_lt_7pct_constant"] if solids == "low" else 1.317e8
+    const = tm["solids_lt_7pct_constant"] if solids == "low" else tm["solids_ge_7pct_constant"]
     return const / 10 ** (0.14 * temp)
 
 # ---- commands --------------------------------------------------------------
@@ -222,7 +222,7 @@ def cmd_ammonia(data, temp, days, initial, nh3, ph, total_am, validate):
 
 def cmd_thermal(data, temp, days, solids):
     tm = data["organisms"]["ascaris"]["thermal_model"]
-    const = tm["solids_lt_7pct_constant"] if solids == "low" else 1.317e8
+    const = tm["solids_lt_7pct_constant"] if solids == "low" else tm["solids_ge_7pct_constant"]
     print(f"THERMAL TREATMENT SCREEN (Ascaris / Class-A pathogen reduction)")
     print(f"  design: sustain {temp}°C for {days} days (solids {'<7%' if solids=='low' else '>=7%'})")
     adv = tm.get("mesophilic_advisory", {})
@@ -247,7 +247,8 @@ def cmd_thermal(data, temp, days, solids):
         print(f"  VERDICT: ✓ MEETS the time–temperature requirement ({days:.2f} d ≥ {D:.2f} d).")
     else:
         print(f"  VERDICT: ✗ UNSAFE (screened out) — {days:.2f} d < required {D:.2f} d at {temp}°C.")
-    print(f"  cross-check (in kinetics data): 50°C→13.2 d (WHO '>1 week'), 57°C→1.1 d (Haug '55–60°C 1–2 d').")
+    xc = ", ".join(f"{p['temp_C']}°C→{p['epa_days']} d ({p['who']})" for p in tm.get("cross_check", []))
+    print(f"  cross-check (in kinetics data): {xc}.")
     print(f"  regulatory whole-mass requirement incl. viable helminth ova; assumes UNIFORM temperature "
           f"(field piles have cold spots — Manga 2020).")
     if tm.get("contested"):

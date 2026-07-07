@@ -1,9 +1,37 @@
 """The system chainer — completeness, constraint propagation, ranking, regressions."""
+import io, contextlib
 import systems
 
 DATA = systems.sel.load()
 BYID = {t["id"]: t for t in DATA["technologies"]}
 PRESETS = systems.sel.PRESETS
+FAECES_BEARING = {"excreta", "faeces", "blackwater", "brownwater"}
+
+def _is_reuse_endpoint(i):
+    t = BYID[i]
+    return (t["group"] == "D" and i not in systems.DISPOSAL
+            and ("biomass" in t.get("outputs", []) or t.get("reuse_products")))
+
+def test_every_reuse_endpoint_gets_a_pathogen_flag():
+    # round-3 regression: NO reuse endpoint may reach a reuse output without the pathogen
+    # safety flag — the biosolids (D.5) and in-situ biomass (arborloo D.1) gaps that the
+    # chemical watch layer covered but the pathogen screen silently dropped.
+    for name, site in PRESETS.items():
+        fit = {t["id"] for t in DATA["technologies"] if not systems.sel.disqualifiers(t, site)}
+        interfaces = [t["id"] for t in DATA["technologies"] if t["group"] == "U" and t["id"] in fit
+                      and FAECES_BEARING & set(t.get("outputs", []))]
+        for u in interfaces:
+            for s in systems.enumerate_systems(DATA, site, u):
+                reuse_nodes = [i for i in set(s) if _is_reuse_endpoint(i)]
+                if not reuse_nodes:
+                    continue
+                buf = io.StringIO()
+                with contextlib.redirect_stdout(buf):
+                    systems.render(DATA, site, s, 1, systems.score(s, BYID))
+                lines = buf.getvalue().splitlines()
+                for i in reuse_nodes:
+                    assert any(i in ln and "⚑" in ln for ln in lines), \
+                        f"{name}: reuse endpoint {i} in {sorted(set(s))} has NO pathogen flag"
 
 def test_flood_plain_uddt_completes_without_any_deep_pit():
     syslist = systems.enumerate_systems(DATA, PRESETS["flood_plain"], "U.2")

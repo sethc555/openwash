@@ -66,6 +66,12 @@ def test_verification_plan_has_three_tiers_ending_in_the_hard_helminth_test():
     # the honest limit must be stated: low E. coli does NOT clear helminths
     assert any("does NOT clear helminths" in step[3] for step in plan)
 
+def test_urine_verification_plan_is_urine_specific():
+    # round-3 fix: urine is dispatched as treatment="storage"; its process tier must still be
+    # the urine-specific "no faecal contact" step, not the generic thermometer text.
+    plan = SR.verification_plan("urine", "storage", (20, 6), "food_raw")
+    assert "faecal contact" in " ".join(plan[0]).lower()
+
 def test_process_tier_matches_the_treatment():
     assert "pH" in " ".join(SR.verification_plan("sludge", "ammonia", (30, 60, 9.1), "soil_only")[0])
     assert "centre" in " ".join(SR.verification_plan("sludge", "thermal", (55, 10), "non_food")[0]).lower()

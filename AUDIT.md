@@ -102,7 +102,31 @@ attested claim that was partly hollow — exactly the things the tool exists to 
 - **`field.tier` is editorial.** The `field` block's `field_corroborated` / `field_contradicted` is a label paired with `status:`, describing whether field evidence matched the design target — **not** a lineage-computed corroboration tier, and the engine does not claim to compute it.
 - **The binding number is single-sourced.** `t90_ascaris_faeces` (125 ± 30 d) is honestly labeled `single_sourced`; the meta-analytic refresh (Musaazi 2023) is already applied in the *ambient decay* path (a regression test pins that it's slower/more conservative than the old WHO value).
 
-## 4. What still holds (and what remains excluded — honestly)
+## 4. Round 3 — re-attack the fixes, and the layers Round 2 never hit (2026-07-07)
+
+Round 2's fixes are fresh code, so they got re-attacked; and the technology-**selection** and
+**systems** layers — barely touched before — got a first real adversarial pass. Four auditors again,
+findings hand-verified, each fix pinned by a regression test (suite 68 → **74**).
+
+**The Round-2 fixes held** — no new false-safe was introduced; the ammonia/storage/urine/corroboration
+changes all fail safe at their boundaries. The new pass found one genuine safety-checkpoint gap and a
+handful of smaller issues:
+
+| # | Defect (verified) | Failure it caused | Fix |
+|---|---|---|---|
+| **HIGH** | **A reuse endpoint dropped its pathogen flag.** `systems.py` only attached the `⚑` pathogen screen to reuse products in `REUSE_HINT`; **biosolids** (land-applied sludge, D.5) wasn't in it, and **in-situ biomass** endpoints (an arborloo, D.1) have no reuse product at all. | Both were scored and labeled "reuse-complete" and got the *chemical* watch flag, but the **pathogen/helminth screen was silently dropped** on the exact land-application pathway that most needs it. | `biosolids` added to `REUSE_HINT`; the flag now fires on **every** reuse endpoint (a fallback covers biomass/arborloo). A test asserts no reuse endpoint across any preset escapes it. |
+| **MED** | **Fail-open on unknown site data.** The water-table and reuse-land gates only fired when the site *provided* the value; a missing value silently passed. | A custom site that omitted water-table depth got **deep pits cleared**; omitting land cleared reuse endpoints. | Fail-**closed**: unknown water-table → a deep pit is disqualified (`water_table_unknown`) pending the value; same for land/reuse-land. |
+| **MED** | **Watch layer skipped dried faeces.** `dried_faeces` wasn't in any hazard's product list. | Direct dried-faeces land reuse — a primary route for the gut resistome and drug residues — carried **no AMR/micropollutant flag**. | Added `dried_faeces` to the AMR and micropollutant hazards. |
+| **LOW** | **Round-2's data fix was incomplete.** `cmd_thermal` still printed a hardcoded `57 °C→1.1 d` labeled "(in kinetics data)" while the data now says 1.38 — the CLI misquoted its own source. | Cosmetic (not a guardrail value), but it made Round 2's "corrected to 1.38" slightly over-stated. | The cross-check line now reads from the data; the EPA-503 high-solids constant moved **into** the kinetics data as a sourced number (was hardcoded in two places) and is now audited by the "no naked numbers" kinetics test. |
+| **LOW** | **Pure-echo corroboration edge.** After the Round-2 restates fix, a value cited *only* by two restatements of different lineages could still compute `multi_corroborated`. | Latent (no such value in the data), but an over-corroboration path by construction. | Independence now comes from primaries only; a pure echo yields no independent lineage → never `multi`. |
+| **LOW** | **Dead urine branch + a hidden load assumption.** `verification_plan`'s urine step was unreachable (urine dispatches as `storage`), and the storage SAFE verdict silently assumed ~40 eggs/g initial load. | Wrong verification label for urine; a very heavy Ascaris load could pass on the 40-egg assumption. | Reordered so urine gets its own step; the SAFE verdict now **states the assumed initial load** ("a heavier load needs longer"). |
+
+**Recorded, not "fixed" (honest limitations):** the S.12 biogas cold-climate constraint in the data is
+advisory-only (no site-temperature field enforces it), and one cost row (S.7 vault) carries a
+whole-toilet figure — both disclosed, neither safety-gating. The **initial-load** assumption remains a
+guided-path simplification (now disclosed, not eliminated).
+
+## 5. What still holds (and what remains excluded — honestly)
 
 **Survives the audit, sharper for it:** treatment is a rounding error (~3–5% of opex); collection and
 demand and subsidy are the binding constraints; the safety substrate, the corroboration engine, and

@@ -172,7 +172,7 @@ data/            sources.yaml (24) · reuse_safety.yaml (42 claims) · dieoff_ki
 engine/          safe_reuse.py (the guardrail — usable check) · openwash.py (safety table)
                  · dieoff.py (die-off screen) · select.py (capability query) · systems.py (system chaining)
                  · costs.py (cost lookup) · watch.py (non-pathogen hazards)
-tests/           68 pytest checks — data integrity, corroboration, all 3 die-off regimes, capability
+tests/           74 pytest checks — data integrity, corroboration, all 3 die-off regimes, capability
                  query, system chaining, limitations, watch layer, safe-reuse guardrail + verification
                  plan (+ regressions). `python -m pytest tests/`
 research/

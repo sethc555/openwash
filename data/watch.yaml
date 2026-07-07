@@ -16,7 +16,7 @@ hazards:
 
   - id: amr_args
     name: "Antimicrobial resistance (antibiotic resistance genes / ARGs)"
-    applies_to_products: [sludge, biosolids, compost, pit_humus, effluent]
+    applies_to_products: [sludge, biosolids, compost, pit_humus, dried_faeces, effluent]
     what: "Antibiotic resistance genes and resistant bacteria in excreta and sludge."
     why_the_safety_table_misses_it: >
       The safety table targets pathogen VIABILITY (log reduction, helminth-egg counts).
@@ -33,7 +33,7 @@ hazards:
 
   - id: micropollutants
     name: "Pharmaceuticals / anthropogenic micropollutants"
-    applies_to_products: [urine, stored_urine, effluent, sludge, biosolids]
+    applies_to_products: [urine, stored_urine, effluent, sludge, biosolids, dried_faeces]
     what: "Drug residues and trace organic pollutants excreted in urine and faeces."
     why_the_safety_table_misses_it: >
       Storage and treatment sized to kill pathogens do not remove micropollutants;

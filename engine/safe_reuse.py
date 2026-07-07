@@ -71,7 +71,8 @@ def screen_storage(temp, days, material_label, initial_eggs=40):
               f"Storage {days} d at {temp}°C meets both the WHO categorical rule (needs "
               f"{rule['need_days'][0]}–{rule['need_days'][1]} d) and the first-order model for ≤1 viable egg/g.",
               None,
-              f"model: {lr:.1f} log → {resid:.2g} eggs/g ({flag}); rule band {rule['band']}.")
+              f"model: {lr:.1f} log → {resid:.2g} eggs/g ({flag}) assuming ~{initial_eggs} eggs/g initial "
+              f"load — a heavier load needs longer; rule band {rule['band']}.")
 
 def screen_ammonia(temp, days, pH, total_mM, material_label, initial_eggs=40):
     """Urine/urea/ash amendment — ammonia (uncharged NH3) inactivation.
@@ -183,7 +184,13 @@ def verification_plan(material, treatment, params, route):
     child = route == "food_raw"
     steps = []
     # Tier 1 — PROCESS / critical-control-point check (cheapest; EVERY batch)
-    if treatment == "storage":
+    # NB: urine is dispatched with treatment="storage", so check material FIRST.
+    if material == "urine":
+        steps.append(("① PROCESS  (every batch, ~$)",
+            "urine was stored the required months with NO faecal contact",
+            "a dated storage log + separation check",
+            "near-free"))
+    elif treatment == "storage":
         temp, days = params[0], params[1]
         steps.append(("① PROCESS  (every batch, ~$)",
             f"the batch actually sat ≥ the required time at ≥{temp}°C",
@@ -201,11 +208,6 @@ def verification_plan(material, treatment, params, route):
             f"the WHOLE mass reached ≥{temp}°C for the required days (centre lags — probe it)",
             "a probe/datalogger left in the pile CENTRE, plus turning records",
             "one $10–30 logger, reused"))
-    elif material == "urine":
-        steps.append(("① PROCESS  (every batch, ~$)",
-            "urine was stored the required months with NO faecal contact",
-            "a dated storage log + separation check",
-            "near-free"))
     # Tier 2 — BACTERIAL INDICATOR (cheap, direct; every batch or spot-check)
     steps.append(("② E. COLI  (per batch / spot, ~$3–5)",
         f"E. coli < {ECOLI_LIMIT} CFU/g  — catches gross treatment failure",

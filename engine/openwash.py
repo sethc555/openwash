@@ -77,9 +77,10 @@ def independent_lineages(value_block, sources):
             restated.add(s["restates"])            # an echo — not independent
         else:
             primary.add(sources.get(s["ref"], {}).get("lineage", s["ref"]))
-    # Independence comes only from primaries. Restatements stand in ONLY when a value is
-    # cited solely by echoes (rare edge) — and then they count as that one echoed lineage.
-    return primary or restated
+    # Independence comes ONLY from primaries — a restatement can never add an independent
+    # lineage. A value cited solely by echoes therefore has no independent support (empty set);
+    # computed_tier then falls to single_lineage/single_sourced via the source count, never multi.
+    return primary
 
 def computed_tier(value_block, sources):
     lin = independent_lineages(value_block, sources)

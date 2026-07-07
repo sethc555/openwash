@@ -52,3 +52,12 @@ def test_presets_all_produce_some_fit():
     for name, site in sel.PRESETS.items():
         fits = [t["id"] for t in DATA["technologies"] if not sel.disqualifiers(t, site)]
         assert fits, f"{name}: nothing fits"
+
+def test_unknown_water_table_fails_closed_for_deep_pit():
+    # round-3 fix: a safety tool must NOT clear a deep pit at a site whose water table is unknown
+    assert "water_table_unknown" in dq("S.2")                          # default site: water table None
+    assert "water_table_unknown" not in dq("S.2", water_table_depth_m=8.0)  # provided & deep enough
+
+def test_unknown_land_fails_closed_for_reuse_endpoint():
+    assert "reuse_land_unknown" in dq("D.2")                           # default site: land None
+    assert "reuse_land_unknown" not in dq("D.2", land_m2_per_capita=12)
