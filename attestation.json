@@ -7,14 +7,14 @@
     "orcid": "0009-0000-5520-915X",
     "doi": "",
     "repo": "https://github.com/sethc555/openwash",
-    "commit": "fd051cf43c6c969b6ef47fb47d556e363fe73f14",
+    "commit": "8ecd3c81e3a5ace17ee1102804288504fa74f4f5",
     "working_tree_dirty": false
   },
   "verifier": {
     "name": "claimcheck",
     "version": "0.1.0"
   },
-  "verified_at": "2026-07-07T19:42:52.569551+00:00",
+  "verified_at": "2026-07-12T18:37:01.979826+00:00",
   "host": {
     "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
     "python": "3.12.3"
@@ -25,73 +25,73 @@
       "id": "suite",
       "status": "pass",
       "exit_code": 0,
-      "duration_s": 1.2,
+      "duration_s": 0.9,
       "detail": "",
-      "stdout_tail": "........................................................................ [ 82%]\n...............                                                          [100%]\n87 passed in 0.98s"
+      "stdout_tail": "........................................................................ [ 82%]\n...............                                                          [100%]\n87 passed in 0.73s"
     },
     {
       "id": "no_naked_numbers",
       "status": "pass",
       "exit_code": 0,
-      "duration_s": 0.4,
+      "duration_s": 0.3,
       "detail": "",
-      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.19s"
+      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.15s"
     },
     {
       "id": "sources_resolve",
       "status": "pass",
       "exit_code": 0,
-      "duration_s": 0.4,
+      "duration_s": 0.3,
       "detail": "",
-      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.17s"
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.13s"
     },
     {
       "id": "overclaim_caught",
       "status": "pass",
       "exit_code": 0,
-      "duration_s": 0.3,
+      "duration_s": 0.2,
       "detail": "",
-      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.08s"
+      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.06s"
     },
     {
       "id": "target_vs_field",
       "status": "pass",
       "exit_code": 0,
-      "duration_s": 0.4,
+      "duration_s": 0.3,
       "detail": "",
-      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.16s"
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.13s"
     },
     {
       "id": "untreated_unsafe",
       "status": "pass",
       "exit_code": 0,
-      "duration_s": 0.3,
+      "duration_s": 0.2,
       "detail": "",
-      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.05s"
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.04s"
     },
     {
       "id": "malawi_field_contradiction",
       "status": "pass",
       "exit_code": 0,
-      "duration_s": 0.3,
+      "duration_s": 0.2,
       "detail": "",
-      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.07s"
+      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.06s"
     },
     {
       "id": "unknown_not_a_guess",
       "status": "pass",
       "exit_code": 0,
-      "duration_s": 0.3,
+      "duration_s": 0.2,
       "detail": "",
-      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.05s"
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.04s"
     },
     {
       "id": "verification_plan_tiers",
       "status": "pass",
       "exit_code": 0,
-      "duration_s": 0.3,
+      "duration_s": 0.2,
       "detail": "",
-      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.05s"
+      "stdout_tail": ".                                                                        [100%]\n1 passed in 0.04s"
     },
     {
       "id": "web_parity",
@@ -105,9 +105,9 @@
       "id": "dieoff_reproduces_anchors",
       "status": "pass",
       "exit_code": 0,
-      "duration_s": 0.3,
+      "duration_s": 0.2,
       "detail": "",
-      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.05s"
+      "stdout_tail": "..                                                                       [100%]\n2 passed in 0.04s"
     }
   ],
   "summary": {
