@@ -37,6 +37,23 @@ from becoming the reinfection.
    that took one reuse pathway all the way to the pipe and the household fee, and
    independently confirmed *why* the substrate scopes itself to safety (below).
 
+## Where this fits — and where it doesn't (honest scope)
+
+The same discipline this project runs on its numbers, it runs on its own reason to exist. A verified
+evidence review was blunt: **a standalone safety tool is not a top-tier fecal–oral disease
+intervention** — the helminth burden it binds on is small next to diarrhoea, and it can't approach the
+cost-effectiveness of water chlorination or vaccines. And the binding constraint on safe reuse scaling
+is **financing and implementation, not knowledge of the safety thresholds** (which the field treats as
+settled) — a conclusion the [techno-economic study](research/reading/ADVERSARIAL_ECON.md) reached
+independently: *safe reuse is a subsidized public good, not a self-funding business.*
+
+So OpenWASH is deliberately **not** pitched as "the thing that ends the disease." It is **the open,
+cheap, trusted verification layer** for the one place that lacks one: **outcome-based sanitation
+finance** (results-based financing, CWIS), where someone has to *cheaply and defensibly confirm* the
+safety outcome a contract pays on. That's a real, unoccupied niche — and it's why the tool is built to
+be re-runnable and self-audited ([`AUDIT.md`](AUDIT.md)) rather than merely trusted. It is a
+*prerequisite and a guardrail*, not the whole answer.
+
 ## The moat, demonstrated
 
 The [`engine`](engine/openwash.py) enforces four things on real data
